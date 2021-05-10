@@ -63,20 +63,24 @@ class Blockchain {
   _addBlock(block) {
     let self = this;
     return new Promise(async (resolve, reject) => {
-      if (self.height !== -1) {
-        let previousBlock = await self.getBlockByHeight(self.height);
-        block.previousBlockHash = previousBlock.hash;
-      }
-      self.height += 1;
-      block.height = self.height;
-      block.time = Date.now();
-      block.hash = SHA256(JSON.stringify(block)).toString();
-      self.chain.push(block);
-      let validationErrors = await self.validateChain();
-      if (validationErrors.length > 0) {
-        reject("Failed to validate new blockchain");
-      } else {
-        resolve(block);
+      try {
+        if (self.height !== -1) {
+          let previousBlock = await self.getBlockByHeight(self.height);
+          block.previousBlockHash = previousBlock.hash;
+        }
+        self.height += 1;
+        block.height = self.height;
+        block.time = Date.now();
+        block.hash = SHA256(JSON.stringify(block)).toString();
+        self.chain.push(block);
+        let validationErrors = await self.validateChain();
+        if (validationErrors.length > 0) {
+          reject("Failed to validate new blockchain");
+        } else {
+          resolve(block);
+        }
+      } catch (error) {
+        reject(error);
       }
     });
   }
@@ -130,7 +134,7 @@ class Blockchain {
             await self._addBlock(block);
             resolve(block);
           } catch (error) {
-            reject("Failed to submit star");
+            reject(error);
           }
         } else {
           reject("Failed to verify message");
@@ -207,13 +211,25 @@ class Blockchain {
     let self = this;
     let errorLog = [];
     return new Promise(async (resolve, reject) => {
-      let validBlock;
-      self.chain.forEach(async (block) => {
-        validBlock = await block.validate();
-        if (!validBlock) {
-          errorLog.push(block);
+      try {
+        let block;
+        let validBlock;
+        for (let i = 0; i < self.chain.length; i++) {
+          block = self.chain[i];
+          validBlock = await block.validate();
+          if (!validBlock) {
+            errorLog.push(`Block #{block.hash} is not valid`);
+          }
+          if (i > 0 && block.previousBlockHash !== self.chain[i - 1].hash) {
+            errorLog.push(
+              `Previous block hash for #{block.hash} does not match`
+            );
+          }
         }
-      });
+      } catch (error) {
+        reject("Failed to validate chain");
+      }
+
       resolve(errorLog);
     });
   }
