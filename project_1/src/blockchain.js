@@ -72,10 +72,11 @@ class Blockchain {
       block.time = Date.now();
       block.hash = SHA256(JSON.stringify(block)).toString();
       self.chain.push(block);
-      if (self.validateChain()) {
-        resolve(block);
-      } else {
+      let validationErrors = await self.validateChain();
+      if (validationErrors.length > 0) {
         reject("Failed to validate new blockchain");
+      } else {
+        resolve(block);
       }
     });
   }
