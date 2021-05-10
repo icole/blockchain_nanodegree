@@ -17,3 +17,8 @@
 ## GET /blocks/:address
 ### Retrieve Stars by Owner
 ![submit-star](https://user-images.githubusercontent.com/1242292/117633797-396faa80-b133-11eb-9bc4-14ace824b102.png)
+
+## GET /validateChain
+### Validates all blocks in blockchain
+![validate-chain](https://user-images.githubusercontent.com/1242292/117698435-95105700-b178-11eb-8461-6a586090c740.png)
+
