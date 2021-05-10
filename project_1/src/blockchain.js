@@ -72,7 +72,11 @@ class Blockchain {
       block.time = Date.now();
       block.hash = SHA256(JSON.stringify(block)).toString();
       self.chain.push(block);
-      resolve(block);
+      if (self.validateChain()) {
+        resolve(block);
+      } else {
+        reject("Failed to validate new blockchain");
+      }
     });
   }
 
