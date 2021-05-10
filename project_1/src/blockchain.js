@@ -120,9 +120,13 @@ class Blockchain {
       let minutes = Math.floor((currentTime - messageTime) / 60);
       if (minutes <= 5) {
         if (bitcoinMessage.verify(message, address, signature)) {
-          let block = new BlockClass.Block({ owner: address, star: star });
-          await self._addBlock(block);
-          resolve(block);
+          try {
+            let block = new BlockClass.Block({ owner: address, star: star });
+            await self._addBlock(block);
+            resolve(block);
+          } catch (error) {
+            reject("Failed to submit star");
+          }
         } else {
           reject("Failed to verify message");
         }
