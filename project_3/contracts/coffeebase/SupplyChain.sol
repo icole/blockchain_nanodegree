@@ -155,10 +155,30 @@ contract SupplyChain {
         string _productNotes
     ) public {
         // Add the new item as part of Harvest
+        uint256 productID = _upc + sku;
+        Item memory newItem = Item(
+            sku,
+            upc,
+            owner,
+            _originFarmerID,
+            _originFarmName,
+            _originFarmInformation,
+            _originFarmLatitude,
+            _originFarmLongitude,
+            productID,
+            _productNotes,
+            0,
+            defaultState,
+            0x0,
+            0x0,
+            0x0
+        );
+        items[_upc] = newItem;
 
         // Increment sku
         sku = sku + 1;
         // Emit the appropriate event
+        emit Harvested(_upc);
     }
 
     // Define a function 'processtItem' that allows a farmer to mark an item 'Processed'
@@ -268,16 +288,17 @@ contract SupplyChain {
         )
     {
         // Assign values to the 8 parameters
+        Item memory item = items[_upc];
 
         return (
-            itemSKU,
-            itemUPC,
-            ownerID,
-            originFarmerID,
-            originFarmName,
-            originFarmInformation,
-            originFarmLatitude,
-            originFarmLongitude
+            item.sku,
+            item.upc,
+            item.ownerID,
+            item.originFarmerID,
+            item.originFarmName,
+            item.originFarmInformation,
+            item.originFarmLatitude,
+            item.originFarmLongitude
         );
     }
 
@@ -298,17 +319,18 @@ contract SupplyChain {
         )
     {
         // Assign values to the 9 parameters
+        Item memory item = items[_upc];
 
         return (
-            itemSKU,
-            itemUPC,
-            productID,
-            productNotes,
-            productPrice,
-            itemState,
-            distributorID,
-            retailerID,
-            consumerID
+            item.sku,
+            item.upc,
+            item.productID,
+            item.productNotes,
+            item.productPrice,
+            uint256(item.itemState),
+            item.distributorID,
+            item.retailerID,
+            item.consumerID
         );
     }
 }
