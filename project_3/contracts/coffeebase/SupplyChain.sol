@@ -95,6 +95,7 @@ contract SupplyChain {
 
     // Define a modifier that checks if an item.state of a upc is Processed
     modifier processed(uint256 _upc) {
+        require(items[_upc].itemState == State.Processed);
         _;
     }
 
@@ -177,6 +178,7 @@ contract SupplyChain {
 
         // Increment sku
         sku = sku + 1;
+
         // Emit the appropriate event
         emit Harvested(_upc);
     }
@@ -190,7 +192,12 @@ contract SupplyChain {
 
     {
         // Update the appropriate fields
+        Item memory item = items[_upc];
+        item.itemState = State.Processed;
+        items[_upc] = item;
+
         // Emit the appropriate event
+        emit Processed(_upc);
     }
 
     // Define a function 'packItem' that allows a farmer to mark an item 'Packed'
