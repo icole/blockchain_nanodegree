@@ -125,15 +125,19 @@ contract("SupplyChain", function (accounts) {
   it("Testing smart contract function packItem() that allows a farmer to pack coffee", async () => {
     const supplyChain = await SupplyChain.deployed();
 
-    // Declare and Initialize a variable for event
+    // Mark an item as Packed by calling function packItem()
+    let tx = await supplyChain.packItem(upc);
 
     // Watch the emitted event Packed()
-
-    // Mark an item as Packed by calling function packItem()
+    truffleAssert.eventEmitted(tx, "Packed", (ev) => {
+      return ev.upc == upc;
+    });
 
     // Retrieve the just now saved item from blockchain by calling function fetchItem()
+    const resultBufferTwo = await supplyChain.fetchItemBufferTwo.call(upc);
 
     // Verify the result set
+    assert.equal(resultBufferTwo[5], 2, "Error: Invalid item State");
   });
 
   // 4th Test
@@ -158,7 +162,6 @@ contract("SupplyChain", function (accounts) {
     // Declare and Initialize a variable for event
 
     // Watch the emitted event Sold()
-    var event = supplyChain.Sold();
 
     // Mark an item as Sold by calling function buyItem()
 
