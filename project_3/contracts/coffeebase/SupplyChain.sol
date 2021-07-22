@@ -249,6 +249,7 @@ contract SupplyChain {
         item.itemState = State.Sold;
         item.ownerID = msg.sender;
         item.distributorID = msg.sender;
+        items[_upc] = item;
 
         // Transfer money to farmer
         item.originFarmerID.transfer(item.productPrice);
@@ -263,6 +264,7 @@ contract SupplyChain {
         // Update the appropriate fields
         Item memory item = items[_upc];
         item.itemState = State.Shipped;
+        items[_upc] = item;
 
         // emit the appropriate event
         emit Shipped(_upc);
@@ -280,6 +282,7 @@ contract SupplyChain {
         item.itemState = State.Received;
         item.ownerID = msg.sender;
         item.retailerID = msg.sender;
+        items[_upc] = item;
 
         // emit the appropriate event
         emit Received(_upc);
@@ -289,7 +292,7 @@ contract SupplyChain {
     // Use the above modifiers to check if the item is received
     function purchaseItem(uint256 _upc)
         public
-        purchased(_upc)
+        received(_upc)
     // Access Control List enforced by calling Smart Contract / DApp
     {
         // Update the appropriate fields - ownerID, distributorID, itemState
@@ -297,6 +300,7 @@ contract SupplyChain {
         item.itemState = State.Purchased;
         item.ownerID = msg.sender;
         item.consumerID = msg.sender;
+        items[_upc] = item;
 
         // emit the appropriate event
         emit Purchased(upc);

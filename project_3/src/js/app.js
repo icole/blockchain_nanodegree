@@ -164,7 +164,6 @@ App = {
   },
 
   harvestItem: function (event) {
-    console.log("harvest");
     event.preventDefault();
     var processId = parseInt($(event.target).data("id"));
 
@@ -177,7 +176,8 @@ App = {
           App.originFarmInformation,
           App.originFarmLatitude,
           App.originFarmLongitude,
-          App.productNotes
+          App.productNotes,
+          { from: App.metamaskAccountID }
         );
       })
       .then(function (result) {
