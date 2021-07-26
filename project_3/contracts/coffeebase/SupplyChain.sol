@@ -1,10 +1,13 @@
 pragma solidity ^0.4.24;
 
-// Define a contract 'Supplychain'
-contract SupplyChain {
-    // Define 'owner'
-    address owner;
+import "../coffeeaccesscontrol/FarmerRole.sol";
+import "../coffeeaccesscontrol/DistributorRole.sol";
+import "../coffeeaccesscontrol/RetailerRole.sol";
+import "../coffeeaccesscontrol/ConsumerRole.sol";
+import "../coffeecore/Ownable.sol";
 
+// Define a contract 'Supplychain'
+contract SupplyChain is RetailerRole, FarmerRole, ConsumerRole, DistributorRole {
     // Define a variable called 'upc' for Universal Product Code (UPC)
     uint256 upc;
 
@@ -60,12 +63,6 @@ contract SupplyChain {
     event Shipped(uint256 upc);
     event Received(uint256 upc);
     event Purchased(uint256 upc);
-
-    // Define a modifer that checks to see if msg.sender == owner of the contract
-    modifier onlyOwner() {
-        require(msg.sender == owner);
-        _;
-    }
 
     // Define a modifer that verifies the Caller
     modifier verifyCaller(uint256 _upc) {
@@ -135,21 +132,17 @@ contract SupplyChain {
         _;
     }
 
-    // In the constructor set 'owner' to the address that instantiated the contract
-    // and set 'sku' to 1
-    // and set 'upc' to 1
+    // Set 'sku' to 1
+    // Set 'upc' to 1
     constructor() public payable {
-        owner = msg.sender;
         sku = 1;
         upc = 1;
     }
 
     // Define a function 'kill' if required
-    function kill() public {
-        if (msg.sender == owner) {
-            selfdestruct(owner);
-        }
-    }
+    //function kill() public onlyOwner {
+    //    selfdestruct(owner());
+    //}
 
     // Define a function 'harvestItem' that allows a farmer to mark an item 'Harvested'
     function harvestItem(
@@ -166,7 +159,7 @@ contract SupplyChain {
         Item memory newItem = Item(
             sku,
             upc,
-            owner,
+            msg.sender,
             _originFarmerID,
             _originFarmName,
             _originFarmInformation,
@@ -182,6 +175,9 @@ contract SupplyChain {
         );
         items[_upc] = newItem;
 
+        // Add new farmer
+        addFarmer(_originFarmerID);
+
         // Increment sku
         sku = sku + 1;
 
@@ -192,8 +188,8 @@ contract SupplyChain {
     // Define a function 'processtItem' that allows a farmer to mark an item 'Processed'
     function processItem(uint256 _upc)
         public
+        onlyFarmer
         harvested(_upc)
-        verifyCaller(_upc)
     {
         // Update the appropriate fields
         Item memory item = items[_upc];
@@ -205,7 +201,11 @@ contract SupplyChain {
     }
 
     // Define a function 'packItem' that allows a farmer to mark an item 'Packed'
-    function packItem(uint256 _upc) public processed(_upc) verifyCaller(_upc) {
+    function packItem(uint256 _upc)
+        public
+        onlyFarmer
+        processed(_upc)
+    {
         // Update the appropriate fields
         Item memory item = items[_upc];
         item.itemState = State.Packed;
@@ -218,8 +218,8 @@ contract SupplyChain {
     // Define a function 'sellItem' that allows a farmer to mark an item 'ForSale'
     function sellItem(uint256 _upc, uint256 _price)
         public
+        onlyFarmer
         packed(_upc)
-        verifyCaller(_upc)
     {
         // Update the appropriate fields
         Item memory item = items[_upc];
@@ -248,6 +248,9 @@ contract SupplyChain {
         item.distributorID = msg.sender;
         items[_upc] = item;
 
+        // Add Distributor
+        //addDistributor(msg.sender);
+
         // Transfer money to farmer
         item.originFarmerID.transfer(item.productPrice);
 
@@ -257,7 +260,11 @@ contract SupplyChain {
 
     // Define a function 'shipItem' that allows the distributor to mark an item 'Shipped'
     // Use the above modifers to check if the item is sold
-    function shipItem(uint256 _upc) public sold(_upc) verifyCaller(_upc) {
+    function shipItem(uint256 _upc)
+        public
+        onlyDistributor
+        sold(_upc)
+    {
         // Update the appropriate fields
         Item memory item = items[_upc];
         item.itemState = State.Shipped;
@@ -281,6 +288,9 @@ contract SupplyChain {
         item.retailerID = msg.sender;
         items[_upc] = item;
 
+        // Add Retailer
+        addRetailer(msg.sender);
+
         // emit the appropriate event
         emit Received(_upc);
     }
@@ -298,6 +308,9 @@ contract SupplyChain {
         item.ownerID = msg.sender;
         item.consumerID = msg.sender;
         items[_upc] = item;
+
+        // Add Consumer
+        addConsumer(msg.sender);
 
         // emit the appropriate event
         emit Purchased(upc);
