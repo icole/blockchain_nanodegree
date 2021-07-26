@@ -238,11 +238,8 @@ contract SupplyChain {
         public
         payable
         forSale(_upc)
-        verifyCaller(_upc)
-    // Call modifer to check if buyer has paid enough
-
-    // Call modifer to send any excess ether back to buyer
-
+        paidEnough(_upc)
+        checkValue(_upc)
     {
         // Update the appropriate fields - ownerID, distributorID, itemState
         Item memory item = items[_upc];
