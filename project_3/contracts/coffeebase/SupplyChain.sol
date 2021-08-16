@@ -278,18 +278,15 @@ contract SupplyChain is RetailerRole, FarmerRole, ConsumerRole, DistributorRole 
     // Use the above modifiers to check if the item is shipped
     function receiveItem(uint256 _upc)
         public
+        onlyRetailer
         shipped(_upc)
-    // Access Control List enforced by calling Smart Contract / DApp
     {
-        // Update the appropriate fields - ownerID, distributorID, itemState
+        // Update the appropriate fields - ownerID, retailerID, itemState
         Item memory item = items[_upc];
         item.itemState = State.Received;
         item.ownerID = msg.sender;
         item.retailerID = msg.sender;
         items[_upc] = item;
-
-        // Add Retailer
-        addRetailer(msg.sender);
 
         // emit the appropriate event
         emit Received(_upc);
@@ -299,8 +296,8 @@ contract SupplyChain is RetailerRole, FarmerRole, ConsumerRole, DistributorRole 
     // Use the above modifiers to check if the item is received
     function purchaseItem(uint256 _upc)
         public
+        onlyConsumer
         received(_upc)
-    // Access Control List enforced by calling Smart Contract / DApp
     {
         // Update the appropriate fields - ownerID, distributorID, itemState
         Item memory item = items[_upc];
@@ -308,9 +305,6 @@ contract SupplyChain is RetailerRole, FarmerRole, ConsumerRole, DistributorRole 
         item.ownerID = msg.sender;
         item.consumerID = msg.sender;
         items[_upc] = item;
-
-        // Add Consumer
-        addConsumer(msg.sender);
 
         // emit the appropriate event
         emit Purchased(upc);

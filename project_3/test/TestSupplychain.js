@@ -164,6 +164,9 @@ contract("SupplyChain", function (accounts) {
   it("Testing smart contract function buyItem() that allows a distributor to buy coffee", async () => {
     const supplyChain = await SupplyChain.deployed();
 
+    // Add distributor
+    supplyChain.addDistributor(distributorID);
+
     // Mark an item as Sold by calling function buyItem()
     let tx = await supplyChain.buyItem(upc, {
       from: distributorID,
@@ -205,7 +208,7 @@ contract("SupplyChain", function (accounts) {
 
     // Retrieve the just now saved item from blockchain by calling function fetchItem()
     const resultBufferTwo = await supplyChain.fetchItemBufferTwo.call(upc);
-
+ 
     // Verify the result set
     assert.equal(resultBufferTwo[5], 5, "Error: Invalid item State");
   });
@@ -213,6 +216,9 @@ contract("SupplyChain", function (accounts) {
   // 7th Test
   it("Testing smart contract function receiveItem() that allows a retailer to mark coffee received", async () => {
     const supplyChain = await SupplyChain.deployed();
+
+    // Add Retailer
+    supplyChain.addRetailer(retailerID);
 
     // Mark and item as Received by calling function receiveItem()
     let tx = await supplyChain.receiveItem(upc, {
@@ -241,6 +247,9 @@ contract("SupplyChain", function (accounts) {
   // 8th Test
   it("Testing smart contract function purchaseItem() that allows a consumer to purchase coffee", async () => {
     const supplyChain = await SupplyChain.deployed();
+
+    // Add Consumer
+    supplyChain.addConsumer(consumerID);
 
     // Mark and item as Purchased by calling function purchaseItem()
     let tx = await supplyChain.purchaseItem(upc, {
