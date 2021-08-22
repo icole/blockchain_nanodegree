@@ -316,9 +316,10 @@ App = {
       });
   },
 
-  fetchItemBufferOne: function () {
-    ///   event.preventDefault();
-    ///    var processId = parseInt($(event.target).data('id'));
+  fetchItemBufferOne: function (event) {
+    event.preventDefault();
+    var processId = parseInt($(event.target).data("id"));
+
     App.upc = $("#upc").val();
     console.log("upc", App.upc);
 
@@ -327,7 +328,7 @@ App = {
         return instance.fetchItemBufferOne(App.upc);
       })
       .then(function (result) {
-        $("#ftc-item").text(result);
+        $("#ftc-item-one").text(result);
         console.log("fetchItemBufferOne", result);
       })
       .catch(function (err) {
@@ -335,16 +336,16 @@ App = {
       });
   },
 
-  fetchItemBufferTwo: function () {
-    ///    event.preventDefault();
-    ///    var processId = parseInt($(event.target).data('id'));
+  fetchItemBufferTwo: function (event) {
+    event.preventDefault();
+    var processId = parseInt($(event.target).data("id"));
 
     App.contracts.SupplyChain.deployed()
       .then(function (instance) {
         return instance.fetchItemBufferTwo.call(App.upc);
       })
       .then(function (result) {
-        $("#ftc-item").text(result);
+        $("#ftc-item-two").text(result);
         console.log("fetchItemBufferTwo", result);
       })
       .catch(function (err) {
