@@ -319,10 +319,7 @@ App = {
       });
   },
 
-  fetchItemBufferOne: function (event) {
-    event.preventDefault();
-    var processId = parseInt($(event.target).data("id"));
-
+  fetchItemBufferOne: function () {
     App.upc = $("#upc").val();
     console.log("upc", App.upc);
 
@@ -339,10 +336,7 @@ App = {
       });
   },
 
-  fetchItemBufferTwo: function (event) {
-    event.preventDefault();
-    var processId = parseInt($(event.target).data("id"));
-
+  fetchItemBufferTwo: function () {
     App.contracts.SupplyChain.deployed()
       .then(function (instance) {
         return instance.fetchItemBufferTwo.call(App.upc);

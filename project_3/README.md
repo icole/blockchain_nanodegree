@@ -1,110 +1,30 @@
-# Supply chain & data auditing
+# Project Overview
 
-This repository containts an Ethereum DApp that demonstrates a Supply Chain flow between a Seller and Buyer. The user story is similar to any commonly used supply chain process. A Seller can add items to the inventory system stored in the blockchain. A Buyer can purchase such items from the inventory system. Additionally a Seller can mark an item as Shipped, and similarly a Buyer can mark an item as Received.
+This is my completed implementation of the Coffee Supply Chain project for the Udacity Blockchain Nanodegree. The initial [starter code](https://github.com/udacity/nd1309-Project-6b-Example-Template) for this project was used as a template
 
-The DApp User Interface when running should look like...
+## Motivation / Architectural Overview
 
-![truffle test](images/ftc_product_overview.png)
+The goal of this project is to create an Ethereum backed supply chain to follow the lifecycle of coffee beans from when a farmer first harvests them, processes them, sells them to a distributor, who then ships them to a retailer that finally sells them to an end consumer.
 
-![truffle test](images/ftc_farm_details.png)
+The main functions to transition through the lifecycle are implemented in the [`SupplyChain.sol`](https://github.com/icole/blockchain_nanodegree/blob/master/project_3/contracts/coffeebase/SupplyChain.sol) Solidity Contract.
 
-![truffle test](images/ftc_product_details.png)
+Each particular step in the supply chain can only be executed by the respective party in that particular piece of the chain (Farmer, Distributor, Retailer, Consumer). These roles and the logic to ensure that only they can perform certain actions are implemented in the [Access Control Contracts](https://github.com/icole/blockchain_nanodegree/tree/master/project_3/contracts/coffeeaccesscontrol).
 
-![truffle test](images/ftc_transaction_history.png)
+By providing this access control throughout the entire lifecycle the end user can verify the authenticity of every upstream piece of the chain (Farmer, Distributor, Retailer).
 
+## Rinkeby Contract
 
-## Getting Started
-
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
-
-### Prerequisites
-
-Please make sure you've already installed ganache-cli, Truffle and enabled MetaMask extension in your browser.
-
-```
-Give examples (to be clarified)
-```
-
-### Installing
-
-A step by step series of examples that tell you have to get a development env running
-
-Clone this repository:
-
-```
-git clone https://github.com/udacity/nd1309/tree/master/course-5/project-6
-```
-
-Change directory to ```project-6``` folder and install all requisite npm packages (as listed in ```package.json```):
-
-```
-cd project-6
-npm install
-```
-
-Launch Ganache:
-
-```
-ganache-cli -m "spirit supply whale amount human item harsh scare congress discover talent hamster"
-```
-
-Your terminal should look something like this:
-
-![truffle test](images/ganache-cli.png)
-
-In a separate terminal window, Compile smart contracts:
-
-```
-truffle compile
-```
-
-Your terminal should look something like this:
-
-![truffle test](images/truffle_compile.png)
-
-This will create the smart contract artifacts in folder ```build\contracts```.
-
-Migrate smart contracts to the locally running blockchain, ganache-cli:
-
-```
-truffle migrate
-```
-
-Your terminal should look something like this:
-
-![truffle test](images/truffle_migrate.png)
-
-Test smart contracts:
-
-```
-truffle test
-```
-
-All 10 tests should pass.
-
-![truffle test](images/truffle_test.png)
-
-In a separate terminal window, launch the DApp:
-
-```
-npm run dev
-```
+Transaction - 0xe11d9dc88cba431b53696244fa477cc861ef048379a78ba0a8cbe05315c021f4
+Contract - 0x7c62aF24FB6b00F9C7B9E1b5A0cC72D6a4A5e485
 
 ## Built With
 
-* [Ethereum](https://www.ethereum.org/) - Ethereum is a decentralized platform that runs smart contracts
-* [IPFS](https://ipfs.io/) - IPFS is the Distributed Web | A peer-to-peer hypermedia protocol
-to make the web faster, safer, and more open.
-* [Truffle Framework](http://truffleframework.com/) - Truffle is the most popular development framework for Ethereum with a mission to make your life a whole lot easier.
-
-
-## Authors
-
-See also the list of [contributors](https://github.com/your/project/contributors.md) who participated in this project.
+- [Ethereum](https://www.ethereum.org/) - Ethereum is a decentralized platform that runs smart contracts
+- [Truffle Framework](http://truffleframework.com/) - Truffle is the most popular development framework for Ethereum with a mission to make your life a whole lot easier.
 
 ## Acknowledgments
 
-* Solidity
-* Ganache-cli
-* Truffle
-* IPFS
+- Solidity
+- Ganache-cli
+- Truffle
+- IPFS
