@@ -10,12 +10,15 @@ The main functions to transition through the lifecycle are implemented in the [`
 
 Each particular step in the supply chain can only be executed by the respective party in that particular piece of the chain (Farmer, Distributor, Retailer, Consumer). These roles and the logic to ensure that only they can perform certain actions are implemented in the [Access Control Contracts](https://github.com/icole/blockchain_nanodegree/tree/master/project_3/contracts/coffeeaccesscontrol).
 
-By providing this access control throughout the entire lifecycle the end user can verify the authenticity of every upstream piece of the chain (Farmer, Distributor, Retailer).
+By providing this access control throughout the entire lifecycle the end user can verify the authenticity of every upstream piece of the chain (Farmer, Distributor, Retailer).![Supply-Chain-History](https://user-images.githubusercontent.com/1242292/130404708-79a8a265-98ea-409f-a048-9a5d5f797c21.png)
+
 
 ## Rinkeby Contract
 
-Transaction - 0xe11d9dc88cba431b53696244fa477cc861ef048379a78ba0a8cbe05315c021f4
-Contract - 0x7c62aF24FB6b00F9C7B9E1b5A0cC72D6a4A5e485
+Transaction - [0xe11d9dc88cba431b53696244fa477cc861ef048379a78ba0a8cbe05315c021f4](https://rinkeby.etherscan.io/tx/0xe11d9dc88cba431b53696244fa477cc861ef048379a78ba0a8cbe05315c021f4)
+
+
+Contract - [0x7c62aF24FB6b00F9C7B9E1b5A0cC72D6a4A5e485](https://rinkeby.etherscan.io/address/0x7c62af24fb6b00f9c7b9e1b5a0cc72d6a4a5e485)
 
 ## Built With
 
