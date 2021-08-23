@@ -159,7 +159,7 @@ contract SupplyChain is
         string memory _originFarmLatitude,
         string memory _originFarmLongitude,
         string memory _productNotes
-    ) public {
+    ) public onlyFarmer {
         // Add the new item as part of Harvest
         uint256 productID = _upc + sku;
         Item memory newItem = Item(
