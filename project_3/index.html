@@ -41,7 +41,7 @@
           type="text"
           id="ownerID"
           name="ownerID"
-          value="0x963865f57804b38459dd4b2da2f760211a200438"
+          value="0x27d8d15cbc94527cadf5ec14b69519ae23288b95"
           size="50"
         /><br />
         <div class="button-div">
@@ -62,7 +62,7 @@
           type="text"
           id="originFarmerID"
           name="originFarmerID"
-          value="0x99c289eb2aacec289631a5ddf62cf27a63d4494f"
+          value="0x018c2dabef4904ecbd7118350a0c54dbeae3549a"
           size="50"
         /><br />
         Farm Name
@@ -97,6 +97,15 @@
           name="originFarmLongitude"
           value="144.341490"
         /><br />
+        Sell Price
+        <br />
+        <input
+            type="number"
+            id="sellPrice"
+            name="sellPrice"
+            value="1"
+        />ETH
+        <br />
         <br />
         <button class="btn-harvest" id="button" type="button" data-id="1">
           Harvest
@@ -123,12 +132,12 @@
           value="Best beans for Espresso"
           size="60"
         /><br />
-        Product Price
+        Buy Price
         <br />
         <input
           type="number"
-          id="productPrice"
-          name="productPrice"
+          id="buyPrice"
+          name="buyPrice"
           value="1"
         />ETH<br />
         Distributor ID
@@ -137,7 +146,7 @@
           type="text"
           id="distributorID"
           name="distributorID"
-          value="0xf1b1bcd24dad92303dd9fe78be639f7bcf9c238d"
+          value="0xce5144391b4ab80668965f2cc4f2cc102380ef0a"
           size="50"
         />
         <br />
@@ -147,16 +156,16 @@
           type="text"
           id="retailerID"
           name="retailerID"
-          value="0x0fb2bfefd526966c87efa19f6693d50971763fc2"
+          value="0x460c31107dd048e34971e57da2f99f659add4f02"
           size="50"
         /><br />
-        Distributor ID
+        Consumer ID
         <br />
         <input
           type="text"
           id="consumerID"
           name="consumerID"
-          value="0x5d777e9127b28fb119e81a6304278a0a21bef1c4"
+          value="0xd37b7b8c62be2fdde8daa9816483aebdbd356088"
           size="50"
         /><br />
         <br />
@@ -179,11 +188,15 @@
 
     <h2>Item Data</h2>
     <div>
-      <span>Data 1 - </span>
+      <span>Result Data - </span>
+      <span id="ftc-item"></span>
+    </div>
+    <div>
+      <span>Fetch Data 1 - </span>
       <span id="ftc-item-one"></span>
     </div>
     <div>
-      <span>Data 2 - </span>
+      <span>Fetch Data 2 - </span>
       <span id="ftc-item-two"></span>
     </div>
 

@@ -86,7 +86,7 @@ contract SupplyChain is
     modifier checkValue(uint256 _upc) {
         uint256 _price = items[_upc].productPrice;
         uint256 amountToReturn = msg.value - _price;
-        items[_upc].consumerID.transfer(amountToReturn);
+        msg.sender.transfer(amountToReturn);
         _;
     }
 

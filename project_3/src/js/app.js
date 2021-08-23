@@ -12,7 +12,8 @@ App = {
   originFarmLatitude: null,
   originFarmLongitude: null,
   productNotes: null,
-  productPrice: 0,
+  sellPrice: 0,
+  buyPrice: 0,
   distributorID: "0x0000000000000000000000000000000000000000",
   retailerID: "0x0000000000000000000000000000000000000000",
   consumerID: "0x0000000000000000000000000000000000000000",
@@ -33,7 +34,8 @@ App = {
     App.originFarmLatitude = $("#originFarmLatitude").val();
     App.originFarmLongitude = $("#originFarmLongitude").val();
     App.productNotes = $("#productNotes").val();
-    App.productPrice = $("#productPrice").val();
+    App.sellPrice = $("#sellPrice").val();
+    App.buyPrice = $("#buyPrice").val();
     App.distributorID = $("#distributorID").val();
     App.retailerID = $("#retailerID").val();
     App.consumerID = $("#consumerID").val();
@@ -48,7 +50,8 @@ App = {
       App.originFarmLatitude,
       App.originFarmLongitude,
       App.productNotes,
-      App.productPrice,
+      App.sellPrice,
+      App.buyPrice,
       App.distributorID,
       App.retailerID,
       App.consumerID
@@ -181,7 +184,7 @@ App = {
         );
       })
       .then(function (result) {
-        $("#ftc-item").text(result);
+        $("#ftc-item").text(JSON.stringify(result));
         console.log("harvestItem", result);
       })
       .catch(function (err) {
@@ -198,7 +201,7 @@ App = {
         return instance.processItem(App.upc, { from: App.metamaskAccountID });
       })
       .then(function (result) {
-        $("#ftc-item").text(result);
+        $("#ftc-item").text(JSON.stringify(result));
         console.log("processItem", result);
       })
       .catch(function (err) {
@@ -215,7 +218,7 @@ App = {
         return instance.packItem(App.upc, { from: App.metamaskAccountID });
       })
       .then(function (result) {
-        $("#ftc-item").text(result);
+        $("#ftc-item").text(JSON.stringify(result));
         console.log("packItem", result);
       })
       .catch(function (err) {
@@ -229,14 +232,13 @@ App = {
 
     App.contracts.SupplyChain.deployed()
       .then(function (instance) {
-        const productPrice = web3.toWei(1, "ether");
-        console.log("productPrice", productPrice);
-        return instance.sellItem(App.upc, App.productPrice, {
+        const sellValue = web3.toWei(App.sellPrice, "ether");
+        return instance.sellItem(App.upc, sellValue, {
           from: App.metamaskAccountID,
         });
       })
       .then(function (result) {
-        $("#ftc-item").text(result);
+        $("#ftc-item").text(JSON.stringify(result));
         console.log("sellItem", result);
       })
       .catch(function (err) {
@@ -247,17 +249,18 @@ App = {
   buyItem: function (event) {
     event.preventDefault();
     var processId = parseInt($(event.target).data("id"));
+    App.buyPrice = $("#buyPrice").val();
 
     App.contracts.SupplyChain.deployed()
       .then(function (instance) {
-        const walletValue = web3.toWei(3, "ether");
+        const buyValue = web3.toWei(App.buyPrice, "ether");
         return instance.buyItem(App.upc, {
           from: App.metamaskAccountID,
-          value: walletValue,
+          value: buyValue,
         });
       })
       .then(function (result) {
-        $("#ftc-item").text(result);
+        $("#ftc-item").text(JSON.stringify(result));
         console.log("buyItem", result);
       })
       .catch(function (err) {
@@ -274,7 +277,7 @@ App = {
         return instance.shipItem(App.upc, { from: App.metamaskAccountID });
       })
       .then(function (result) {
-        $("#ftc-item").text(result);
+        $("#ftc-item").text(JSON.stringify(result));
         console.log("shipItem", result);
       })
       .catch(function (err) {
@@ -291,7 +294,7 @@ App = {
         return instance.receiveItem(App.upc, { from: App.metamaskAccountID });
       })
       .then(function (result) {
-        $("#ftc-item").text(result);
+        $("#ftc-item").text(JSON.stringify(result));
         console.log("receiveItem", result);
       })
       .catch(function (err) {
@@ -308,7 +311,7 @@ App = {
         return instance.purchaseItem(App.upc, { from: App.metamaskAccountID });
       })
       .then(function (result) {
-        $("#ftc-item").text(result);
+        $("#ftc-item").text(JSON.stringify(result));
         console.log("purchaseItem", result);
       })
       .catch(function (err) {
