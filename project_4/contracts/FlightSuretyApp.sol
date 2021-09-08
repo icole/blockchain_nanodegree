@@ -35,6 +35,8 @@ contract FlightSuretyApp {
     }
     mapping(bytes32 => Flight) private flights;
 
+    IFlightSuretyData private dataContract;
+
     /********************************************************************************************/
     /*                                       FUNCTION MODIFIERS                                 */
     /********************************************************************************************/
@@ -69,8 +71,9 @@ contract FlightSuretyApp {
      * @dev Contract constructor
      *
      */
-    constructor() {
+    constructor(address dataContractAddress) {
         contractOwner = msg.sender;
+        dataContract = IFlightSuretyData(dataContractAddress);
     }
 
     /********************************************************************************************/
@@ -89,11 +92,11 @@ contract FlightSuretyApp {
      * @dev Add an airline to the registration queue
      *
      */
-    function registerAirline()
+    function registerAirline(address newAirline)
         external
-        pure
         returns (bool success, uint256 votes)
     {
+        dataContract.registerAirline(newAirline);
         return (success, 0);
     }
 
@@ -134,7 +137,7 @@ contract FlightSuretyApp {
         emit OracleRequest(index, airline, flight, timestamp);
     }
 
-    // region ORACLE MANAGEMENT
+    // #region
 
     // Incremented to add pseudo-randomness at various points
     uint8 private nonce = 0;
@@ -300,5 +303,9 @@ contract FlightSuretyApp {
         return random;
     }
 
-    // endregion
+    // #endregion
+}
+
+interface IFlightSuretyData {
+    function registerAirline(address newAirline) external;
 }

@@ -12,6 +12,7 @@ contract FlightSuretyData {
 
     address private contractOwner; // Account used to deploy contract
     bool private operational = true; // Blocks all state changes throughout the contract if false
+    mapping(address => bool) private registeredAirlines; // Registered Airlines
 
     /********************************************************************************************/
     /*                                       EVENT DEFINITIONS                                  */
@@ -72,6 +73,15 @@ contract FlightSuretyData {
         operational = mode;
     }
 
+    /**
+     * @dev Checks if a particular airline is regisered
+     *
+     * @return A bool that is whether the airline is registered or not
+     */
+    function isAirline(address airline) public view returns (bool) {
+        return registeredAirlines[airline];
+    }
+
     /********************************************************************************************/
     /*                                     SMART CONTRACT FUNCTIONS                             */
     /********************************************************************************************/
@@ -81,7 +91,9 @@ contract FlightSuretyData {
      *      Can only be called from FlightSuretyApp contract
      *
      */
-    function registerAirline() external pure {}
+    function registerAirline(address newAirline) external {
+        registeredAirlines[newAirline] = true;
+    }
 
     /**
      * @dev Buy insurance for a flight
