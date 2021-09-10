@@ -16,7 +16,8 @@ import "./flightsurety.css";
 
     // User-submitted transaction
     DOM.elid("submit-oracle").addEventListener("click", () => {
-      let flight = DOM.elid("flight-number").value;
+      let flight = DOM.elid("flight-number").value;      
+
       // Write transaction
       contract.fetchFlightStatus(flight, (error, result) => {
         display("Oracles", "Trigger oracles", [
@@ -24,6 +25,34 @@ import "./flightsurety.css";
             label: "Fetch Flight Status",
             error: error,
             value: result.flight + " " + result.timestamp,
+          },
+        ]);
+      });
+    });
+
+    DOM.elid("find-flight").addEventListener("click", () => {
+      let flight = DOM.elid("flight-number").value;      
+
+      contract.getFlightDetails(flight, (error, result) => {
+        display(`Flight ${flight}`, "Status Details", [
+          {
+            label: "Status Details",
+            error: error,
+            value: `Registered: ${result.isRegistered}, Status Code: ${result.statusCode}`,
+          },
+        ]);
+      });
+    });
+
+    DOM.elid("register-flight").addEventListener("click", () => {
+      let flight = DOM.elid("flight-number").value;      
+
+      contract.registerFlight(flight, (error, result) => {
+        display(`Flight ${flight}`, "Registration", [
+          {
+            label: "Registration Details",
+            error: error,
+            value: `Airline: ${result.airline}, Flight: ${result.flight}, Timestamp: ${result.timestamp}`,
           },
         ]);
       });

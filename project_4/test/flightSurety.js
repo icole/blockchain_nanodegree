@@ -85,10 +85,12 @@ contract("Flight Surety Tests", async (accounts) => {
     let newAirline = accounts[2];
 
     // ACT
-    await config.flightSuretyApp.registerAirline(newAirline, {
+    let registerResult = await config.flightSuretyApp.registerAirline(newAirline, {
       from: config.firstAirline,
     });
     let result = await config.flightSuretyData.isAirline(newAirline);
+
+    console.log(registerResult);
 
     // ASSERT
     assert.equal(

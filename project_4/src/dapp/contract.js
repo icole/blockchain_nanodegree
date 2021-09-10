@@ -12,7 +12,7 @@ export default class Contract {
     );
     this.initialize(callback);
     this.owner = null;
-    this.airlines = [];
+    this.airlines = ['0xf17f52151EbEF6C7334FAD080c5704D77216b732'];
     this.passengers = [];
   }
 
@@ -52,6 +52,29 @@ export default class Contract {
       .fetchFlightStatus(payload.airline, payload.flight, payload.timestamp)
       .send({ from: self.owner }, (error, result) => {
         callback(error, payload);
+      });
+  }
+
+  registerFlight(flight, callback) {
+    let self = this;
+    let payload = {
+      airline: self.airlines[0],
+      flight: flight,
+      timestamp: Math.floor(Date.now() / 1000),
+    };
+    self.flightSuretyApp.methods
+      .registerFlight(payload.flight, payload.timestamp)
+      .send({ from: payload.airline }, (error, result) => {
+        callback(error, payload);
+      });
+  }
+
+  getFlightDetails(flight, callback) {
+    let self = this;
+    self.flightSuretyApp.methods
+      .getFlightDetails(self.airlines[0], flight)
+      .call({ from: self.owner }, (error, result) => {
+        callback(error, result);
       });
   }
 }

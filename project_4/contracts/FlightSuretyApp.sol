@@ -84,6 +84,16 @@ contract FlightSuretyApp {
         return true; // Modify to call data contract's status
     }
 
+    function getFlightDetails(address airline, string memory flight) 
+        public 
+        view 
+        returns (bool isRegistered, uint256 statusCode) 
+    {
+        bytes32 key = getFlightKey(airline, flight);
+        Flight memory flightRecord = flights[key];
+        return (flightRecord.isRegistered, flightRecord.statusCode);
+    }
+
     /********************************************************************************************/
     /*                                     SMART CONTRACT FUNCTIONS                             */
     /********************************************************************************************/
@@ -97,14 +107,23 @@ contract FlightSuretyApp {
         returns (bool success, uint256 votes)
     {
         dataContract.registerAirline(newAirline);
-        return (success, 0);
+        return (true, 0);
     }
 
     /**
      * @dev Register a future flight for insuring.
      *
      */
-    function registerFlight() external pure {}
+    function registerFlight(string memory flight, uint256 timestamp) external {
+        address airline = msg.sender;
+        bytes32 key = getFlightKey(airline, flight);
+        flights[key] = Flight({
+            isRegistered: true,
+            statusCode: STATUS_CODE_UNKNOWN,
+            updatedTimestamp: timestamp,
+            airline: airline
+        });
+    }
 
     /**
      * @dev Called after oracle has updated flight status
@@ -115,7 +134,12 @@ contract FlightSuretyApp {
         string memory flight,
         uint256 timestamp,
         uint8 statusCode
-    ) internal pure {}
+    ) internal {
+        bytes32 key = getFlightKey(airline, flight);
+        Flight memory flightRecord = flights[key];
+        flightRecord.statusCode = statusCode;
+        flightRecord.updatedTimestamp = timestamp;
+    }
 
     // Generate a request for oracles to fetch flight information
     function fetchFlightStatus(
@@ -256,10 +280,9 @@ contract FlightSuretyApp {
 
     function getFlightKey(
         address airline,
-        string memory flight,
-        uint256 timestamp
+        string memory flight
     ) internal pure returns (bytes32) {
-        return keccak256(abi.encodePacked(airline, flight, timestamp));
+        return keccak256(abi.encodePacked(airline, flight));
     }
 
     // Returns array of three non-duplicating integers from 0-9
