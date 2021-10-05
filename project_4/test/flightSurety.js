@@ -80,23 +80,27 @@ contract("Flight Surety Tests", async (accounts) => {
   //   );
   // });
 
+  it("(airline) first airline is registered after deploy", async () => {
+    let result = await config.flightSuretyData.isAirline(config.firstAirline);
+
+    // ASSERT
+    assert.equal(result, true, "First airline should be found");
+  });
+
   it("(airline) first airline can register a new one", async () => {
     // ARRANGE
     let newAirline = accounts[2];
 
     // ACT
-    let registerResult = await config.flightSuretyApp.registerAirline(newAirline, {
-      from: config.firstAirline,
-    });
+    let registerResult = await config.flightSuretyApp.registerAirline(
+      newAirline,
+      {
+        from: config.firstAirline,
+      }
+    );
     let result = await config.flightSuretyData.isAirline(newAirline);
 
-    console.log(registerResult);
-
     // ASSERT
-    assert.equal(
-      result,
-      true,
-      "New registered airline should be found"
-    );
+    assert.equal(result, true, "New registered airline should be found");
   });
 });

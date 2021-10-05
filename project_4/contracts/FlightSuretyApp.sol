@@ -84,10 +84,10 @@ contract FlightSuretyApp {
         return true; // Modify to call data contract's status
     }
 
-    function getFlightDetails(address airline, string memory flight) 
-        public 
-        view 
-        returns (bool isRegistered, uint256 statusCode) 
+    function getFlightDetails(address airline, string memory flight)
+        public
+        view
+        returns (bool isRegistered, uint256 statusCode)
     {
         bytes32 key = getFlightKey(airline, flight);
         Flight memory flightRecord = flights[key];
@@ -134,7 +134,7 @@ contract FlightSuretyApp {
         string memory flight,
         uint256 timestamp,
         uint8 statusCode
-    ) internal {
+    ) internal view {
         bytes32 key = getFlightKey(airline, flight);
         Flight memory flightRecord = flights[key];
         flightRecord.statusCode = statusCode;
@@ -278,10 +278,11 @@ contract FlightSuretyApp {
         }
     }
 
-    function getFlightKey(
-        address airline,
-        string memory flight
-    ) internal pure returns (bytes32) {
+    function getFlightKey(address airline, string memory flight)
+        internal
+        pure
+        returns (bytes32)
+    {
         return keccak256(abi.encodePacked(airline, flight));
     }
 
