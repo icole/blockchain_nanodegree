@@ -1,0 +1,24 @@
+# /home/icole/.config/tmuxinator/flight_surety.yml
+
+name: flight_surety
+root: ~/Workspace/blockchain_nanodegree/project_4/
+
+windows:
+  - truffle:
+      layout: tiled
+      panes:
+        - ganache:
+            - ./start-ganache-cli.sh
+        - truffle-migrate:
+            - sleep 5
+            - truffle migrate
+        - truffle-test:
+            - sleep 5
+            - truffle test ./test/flightSurety.js
+  - servers:
+      layout: main-vertical
+      panes:
+        - dapp:
+            - npm run dapp
+        - oracles:
+            - npm run server
