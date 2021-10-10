@@ -1,6 +1,6 @@
 # /home/icole/.config/tmuxinator/flight_surety.yml
 
-name: flight_surety
+name: project4
 root: ~/Workspace/blockchain_nanodegree/project_4/
 
 windows:
@@ -16,7 +16,7 @@ windows:
             - sleep 5
             - truffle test ./test/flightSurety.js
   - servers:
-      layout: main-vertical
+      layout: even-vertical
       panes:
         - dapp:
             - npm run dapp
