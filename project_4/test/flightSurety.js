@@ -21,7 +21,7 @@ contract("Flight Surety Tests", async (accounts) => {
     // Ensure that access is denied for non-Contract Owner account
     let accessDenied = false;
     try {
-      await config.flightSuretyData.setOperatingStatus(false, {
+      await config.flightSuretyData.setOperatingStatus.call(false, {
         from: config.firstAirline,
       });
     } catch (e) {
@@ -60,54 +60,55 @@ contract("Flight Surety Tests", async (accounts) => {
     await config.flightSuretyData.setOperatingStatus(true);
   });
 
-  it("(airline) first airline is registered after deploy", async () => {
-    let result = await config.flightSuretyData.isAirline(config.firstAirline);
+  it("(airline) contract owner can register first airline", async () => {
+    await config.flightSuretyApp.registerAirline(
+      config.firstAirline,
+      "Test Airline",
+      {
+        from: config.owner,
+      }
+    );
+    let result = await config.flightSuretyData.isRegisteredAirline(
+      config.firstAirline
+    );
 
     // ASSERT
     assert.equal(result, true, "First airline should be found");
-  });
-
-  it("(airline) first airline can register a new one", async () => {
-    // ARRANGE
-    let newAirline = accounts[2];
-
-    // ACT
-    let registerResult = await config.flightSuretyApp.registerAirline(
-      newAirline,
-      {
-        from: config.firstAirline,
-      }
-    );
-    let result = await config.flightSuretyData.isAirline(newAirline);
-
-    // ASSERT
-    assert.equal(result, true, "New registered airline should be found");
   });
 
   it("(airline) cannot register an Airline using registerAirline() if it is not funded", async () => {
     // ARRANGE
     let unfundedAirline = accounts[2];
     let newAirline = accounts[3];
-    let isAirline = await config.flightSuretyData.isAirline(unfundedAirline);
-    if (!isAirline) {
-      await config.flightSuretyApp.registerAirline(unfundedAirline, {
-        from: config.firstAirline,
-      });
-      isAirline = await config.flightSuretyData.isAirline(unfundedAirline);
+    let isRegisteredAirline = await config.flightSuretyData.isRegisteredAirline(
+      unfundedAirline
+    );
+    if (!isRegisteredAirline) {
+      let result = await config.flightSuretyApp.registerAirline(
+        unfundedAirline,
+        "Unfunded Airline",
+        {
+          from: config.owner,
+        }
+      );
+      isRegisteredAirline = await config.flightSuretyData.isRegisteredAirline(
+        unfundedAirline
+      );
     }
-    assert.equal(isAirline, true, "Unfunded airline should be registered");
-
-    //await config.flightSuretyApp.registerAirline(undfundedAirline);
-
+    assert.equal(
+      isRegisteredAirline,
+      true,
+      "Unfunded airline should be registered"
+    );
     // ACT
     try {
-      await config.flightSuretyApp.registerAirline(newAirline, {
+      await config.flightSuretyApp.registerAirline(newAirline, "New Airline", {
         from: unfundedAirline,
       });
     } catch (e) {}
-    let result = await config.flightSuretyData.isAirline.call(newAirline);
 
     // ASSERT
+    let result = await config.flightSuretyData.isRegisteredAirline(newAirline);
     assert.equal(
       result,
       false,

@@ -63,6 +63,18 @@ contract FlightSuretyApp {
         _;
     }
 
+    /**
+     * @dev Modifier that reuiqres the caller to be a funded airline (or contract owner for first airline)
+     */
+    modifier requireFundedAirline() {
+        require(
+            dataContract.isFundedAirline(msg.sender) ||
+                (msg.sender == contractOwner),
+            "Caller is not a funded airline"
+        );
+        _;
+    }
+
     /********************************************************************************************/
     /*                                       CONSTRUCTOR                                        */
     /********************************************************************************************/
@@ -80,8 +92,8 @@ contract FlightSuretyApp {
     /*                                       UTILITY FUNCTIONS                                  */
     /********************************************************************************************/
 
-    function isOperational() public pure returns (bool) {
-        return true; // Modify to call data contract's status
+    function isOperational() public returns (bool) {
+        return dataContract.isOperational();
     }
 
     function getFlightDetails(address airline, string memory flight)
@@ -104,6 +116,7 @@ contract FlightSuretyApp {
      */
     function registerAirline(address airlineAddress, string memory airlineName)
         external
+        requireFundedAirline
         returns (bool success, uint256 votes)
     {
         dataContract.registerAirline(airlineAddress, airlineName);
@@ -196,6 +209,8 @@ contract FlightSuretyApp {
     // Track all oracle responses
     // Key = hash(index, flight, timestamp)
     mapping(bytes32 => ResponseInfo) private oracleResponses;
+
+    event Test(address foo);
 
     // Event fired each time an oracle submits a response
     event FlightStatusInfo(
@@ -335,7 +350,12 @@ contract FlightSuretyApp {
 }
 
 interface IFlightSuretyData {
-    function registerAirline(address airlineAddress, string memory airlineName) external;
+    function registerAirline(address airlineAddress, string memory airlineName)
+        external;
 
     function fundAirline(address airlineAddress) external payable;
+
+    function isFundedAirline(address airlineAddress) external returns (bool);
+
+    function isOperational() external returns (bool);
 }
