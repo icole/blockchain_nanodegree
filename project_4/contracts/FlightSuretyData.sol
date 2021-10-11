@@ -11,8 +11,16 @@ contract FlightSuretyData {
     /********************************************************************************************/
 
     address private contractOwner; // Account used to deploy contract
+    address private appContractAddress; // App contract allows to interact
     bool private operational = true; // Blocks all state changes throughout the contract if false
-    mapping(address => bool) private registeredAirlines; // Registered Airlines
+    
+    struct Airline {
+        string name;
+        bool isRegistered;
+        bool isFunded;
+    }
+    
+    mapping(address => Airline) private registeredAirlines; // Registered Airlines
 
     /********************************************************************************************/
     /*                                       EVENT DEFINITIONS                                  */
@@ -22,9 +30,8 @@ contract FlightSuretyData {
      * @dev Constructor
      *      The deploying account becomes contractOwner
      */
-    constructor(address firstAirline) {
+    constructor() {
         contractOwner = msg.sender;
-        registeredAirlines[firstAirline] = true;
     }
 
     /********************************************************************************************/
@@ -80,8 +87,19 @@ contract FlightSuretyData {
      * @return A bool that is whether the airline is registered or not
      */
     function isAirline(address airline) public view returns (bool) {
-        return registeredAirlines[airline];
+        return registeredAirlines[airline].isRegistered;
     }
+
+    /**
+     * @dev Sets the App contract address authorized to call this contract
+     */
+    function setAppContract(address _appContractAddress) external requireContractOwner {
+        appContractAddress = _appContractAddress;
+    }
+
+    /**
+      
+     */
 
     /********************************************************************************************/
     /*                                     SMART CONTRACT FUNCTIONS                             */
@@ -92,8 +110,21 @@ contract FlightSuretyData {
      *      Can only be called from FlightSuretyApp contract
      *
      */
-    function registerAirline(address newAirline) external {
-        registeredAirlines[newAirline] = true;
+    function registerAirline(address airlineAddress, string memory airlineName) external {
+        registeredAirlines[airlineAddress] = Airline({
+            name: airlineName,
+            isRegistered: true,
+            isFunded: false
+        });
+    }
+
+    /**
+     * @dev Fund a particular airline
+     */
+    function fundAirline(address airlineAddress) external payable {
+        Airline memory airline = registeredAirlines[airlineAddress];
+        airline.isFunded = true;
+        registeredAirlines[airlineAddress] = airline; 
     }
 
     /**

@@ -60,26 +60,6 @@ contract("Flight Surety Tests", async (accounts) => {
     await config.flightSuretyData.setOperatingStatus(true);
   });
 
-  // it("(airline) cannot register an Airline using registerAirline() if it is not funded", async () => {
-  //   // ARRANGE
-  //   let newAirline = accounts[2];
-
-  //   // ACT
-  //   try {
-  //     await config.flightSuretyApp.registerAirline(newAirline, {
-  //       from: config.firstAirline,
-  //     });
-  //   } catch (e) {}
-  //   let result = await config.flightSuretyData.isAirline.call(newAirline);
-
-  //   // ASSERT
-  //   assert.equal(
-  //     result,
-  //     false,
-  //     "Airline should not be able to register another airline if it hasn't provided funding"
-  //   );
-  // });
-
   it("(airline) first airline is registered after deploy", async () => {
     let result = await config.flightSuretyData.isAirline(config.firstAirline);
 
@@ -102,5 +82,36 @@ contract("Flight Surety Tests", async (accounts) => {
 
     // ASSERT
     assert.equal(result, true, "New registered airline should be found");
+  });
+
+  it("(airline) cannot register an Airline using registerAirline() if it is not funded", async () => {
+    // ARRANGE
+    let unfundedAirline = accounts[2];
+    let newAirline = accounts[3];
+    let isAirline = await config.flightSuretyData.isAirline(unfundedAirline);
+    if (!isAirline) {
+      await config.flightSuretyApp.registerAirline(unfundedAirline, {
+        from: config.firstAirline,
+      });
+      isAirline = await config.flightSuretyData.isAirline(unfundedAirline);
+    }
+    assert.equal(isAirline, true, "Unfunded airline should be registered");
+
+    //await config.flightSuretyApp.registerAirline(undfundedAirline);
+
+    // ACT
+    try {
+      await config.flightSuretyApp.registerAirline(newAirline, {
+        from: unfundedAirline,
+      });
+    } catch (e) {}
+    let result = await config.flightSuretyData.isAirline.call(newAirline);
+
+    // ASSERT
+    assert.equal(
+      result,
+      false,
+      "Airline should not be able to register another airline if it hasn't provided funding"
+    );
   });
 });

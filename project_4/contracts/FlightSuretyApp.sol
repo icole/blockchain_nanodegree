@@ -102,12 +102,16 @@ contract FlightSuretyApp {
      * @dev Add an airline to the registration queue
      *
      */
-    function registerAirline(address newAirline)
+    function registerAirline(address airlineAddress, string memory airlineName)
         external
         returns (bool success, uint256 votes)
     {
-        dataContract.registerAirline(newAirline);
+        dataContract.registerAirline(airlineAddress, airlineName);
         return (true, 0);
+    }
+
+    function fundAirline() external payable {
+        dataContract.fundAirline{value: msg.value}(msg.sender);
     }
 
     /**
@@ -331,5 +335,7 @@ contract FlightSuretyApp {
 }
 
 interface IFlightSuretyData {
-    function registerAirline(address newAirline) external;
+    function registerAirline(address airlineAddress, string memory airlineName) external;
+
+    function fundAirline(address airlineAddress) external payable;
 }
