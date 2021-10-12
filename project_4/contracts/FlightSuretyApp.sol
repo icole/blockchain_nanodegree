@@ -35,6 +35,11 @@ contract FlightSuretyApp {
     }
     mapping(bytes32 => Flight) private flights;
 
+    event AirlineFunded(
+        address airlineAddress,
+        bool isFunded
+    );
+
     IFlightSuretyData private dataContract;
 
     /********************************************************************************************/
@@ -64,13 +69,34 @@ contract FlightSuretyApp {
     }
 
     /**
-     * @dev Modifier that reuiqres the caller to be a funded airline (or contract owner for first airline)
+     * @dev Modifier that requires the caller to be a registered airline
+     */
+    modifier requireRegisteredAirline() {
+        require(
+            dataContract.isRegisteredAirline(msg.sender),
+            "Caller is not a registered airline"
+        );
+        _;
+    }
+
+    /**
+     * @dev Modifier that requires the caller to be a funded airline (or contract owner for first airline)
      */
     modifier requireFundedAirline() {
         require(
             dataContract.isFundedAirline(msg.sender) ||
                 (msg.sender == contractOwner),
             "Caller is not a funded airline"
+        );
+        _;
+    }
+
+    /**
+     * @dev Modifier that requires the value sent for airline funding to be enough
+     */
+    modifier requireSufficientFunds() {
+        require(msg.value >= 10 ether,
+            "Sufficient funding not provided"
         );
         _;
     }
@@ -106,6 +132,10 @@ contract FlightSuretyApp {
         return (flightRecord.isRegistered, flightRecord.statusCode);
     }
 
+    function isFundedAirline(address airlineAddress) public returns (bool) {
+        return dataContract.isFundedAirline(airlineAddress);
+    }
+
     /********************************************************************************************/
     /*                                     SMART CONTRACT FUNCTIONS                             */
     /********************************************************************************************/
@@ -123,8 +153,11 @@ contract FlightSuretyApp {
         return (true, 0);
     }
 
-    function fundAirline() external payable {
-        dataContract.fundAirline{value: msg.value}(msg.sender);
+    function fundAirline() external requireRegisteredAirline requireSufficientFunds payable {
+        bool isFunded = dataContract.fundAirline{value: msg.value}(msg.sender);
+        if(isFunded) {
+            emit AirlineFunded(msg.sender, isFunded);
+        }
     }
 
     /**
@@ -209,8 +242,6 @@ contract FlightSuretyApp {
     // Track all oracle responses
     // Key = hash(index, flight, timestamp)
     mapping(bytes32 => ResponseInfo) private oracleResponses;
-
-    event Test(address foo);
 
     // Event fired each time an oracle submits a response
     event FlightStatusInfo(
@@ -353,7 +384,9 @@ interface IFlightSuretyData {
     function registerAirline(address airlineAddress, string memory airlineName)
         external;
 
-    function fundAirline(address airlineAddress) external payable;
+    function fundAirline(address airlineAddress) external payable returns (bool);
+
+    function isRegisteredAirline(address airlineAddress) external returns (bool);
 
     function isFundedAirline(address airlineAddress) external returns (bool);
 

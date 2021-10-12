@@ -135,10 +135,11 @@ contract FlightSuretyData {
     /**
      * @dev Fund a particular airline
      */
-    function fundAirline(address airlineAddress) external payable {
+    function fundAirline(address airlineAddress) external payable returns (bool) {
         Airline memory airline = registeredAirlines[airlineAddress];
         airline.isFunded = true;
         registeredAirlines[airlineAddress] = airline;
+        return airline.isFunded;
     }
 
     /**

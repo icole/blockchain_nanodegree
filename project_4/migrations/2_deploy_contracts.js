@@ -20,13 +20,13 @@ module.exports = async function (deployer, network, accounts) {
   });
 
   // Register First Airline
-  // await app.registerAirline(firstAirlineAddress, firstAirlineName, {
-  //   from: contractOwner,
-  // });
-  // await app.fundAirline({
-  //   from: firstAirlineAddress,
-  //   value: web3.utils.toWei("10", "ether"),
-  // });
+  await app.registerAirline(firstAirlineAddress, firstAirlineName, {
+    from: contractOwner,
+  });
+  await app.fundAirline({
+    from: firstAirlineAddress,
+    value: web3.utils.toWei("10", "ether"),
+  });
 
   // Store addresses in config file
   let config = {
