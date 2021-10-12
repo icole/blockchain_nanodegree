@@ -161,9 +161,50 @@ contract("Flight Surety Tests", async (accounts) => {
     assert.equal(airlineFunded, true, "Airline should be funded");
   });
 
+  it("(airline) can register another Airline after it is funded", async () => {
+    // ARRANGE
+    let fundedAirline = accounts[2];
+    let airlineFunded = await config.flightSuretyApp.isFundedAirline.call(
+      fundedAirline
+    );
+    assert.equal(airlineFunded, true, "Airline should be funded");
+
+    let unregisteredAirline = accounts[3];
+    isRegisteredAirline = await config.flightSuretyData.isRegisteredAirline(
+      unregisteredAirline
+    );
+    assert.equal(
+      isRegisteredAirline,
+      false,
+      "Airline should not be registered"
+    );
+
+    // ACT
+    let tx = await config.flightSuretyApp.registerAirline(
+      unregisteredAirline,
+      "Foo Fighter Airlines",
+      {
+        from: fundedAirline,
+      }
+    );
+
+    // ASSERT
+    // Watch the emitted event AirlineFunded()
+    truffleAssert.eventEmitted(tx, "AirlineRegistered", (ev) => {
+      return (
+        ev.airlineAddress == unregisteredAirline && ev.isRegistered == true
+      );
+    });
+    let airlineRegistered =
+      await config.flightSuretyApp.isRegisteredAirline.call(
+        unregisteredAirline
+      );
+    assert.equal(airlineRegistered, true, "Airline should be registered");
+  });
+
   it("(airline) cannot be funded if it is not registered", async () => {
     // ARRANGE
-    let unregisteredAirline = accounts[3];
+    let unregisteredAirline = accounts[4];
     let isRegisteredAirline = await config.flightSuretyData.isRegisteredAirline(
       unregisteredAirline
     );

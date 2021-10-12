@@ -123,13 +123,15 @@ contract FlightSuretyData {
      *
      */
     function registerAirline(address airlineAddress, string memory airlineName)
-        external
+        external returns (bool)
     {
-        registeredAirlines[airlineAddress] = Airline({
+        Airline memory newAirline = Airline({
             name: airlineName,
             isRegistered: true,
             isFunded: false
         });
+        registeredAirlines[airlineAddress] = newAirline;
+        return newAirline.isRegistered;
     }
 
     /**

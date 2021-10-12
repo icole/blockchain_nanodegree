@@ -35,6 +35,12 @@ contract FlightSuretyApp {
     }
     mapping(bytes32 => Flight) private flights;
 
+
+    event AirlineRegistered(
+        address airlineAddress,
+        bool isRegistered
+    );
+
     event AirlineFunded(
         address airlineAddress,
         bool isFunded
@@ -132,6 +138,10 @@ contract FlightSuretyApp {
         return (flightRecord.isRegistered, flightRecord.statusCode);
     }
 
+    function isRegisteredAirline(address airlineAddress) public returns (bool) {
+        return dataContract.isRegisteredAirline(airlineAddress);
+    }
+
     function isFundedAirline(address airlineAddress) public returns (bool) {
         return dataContract.isFundedAirline(airlineAddress);
     }
@@ -149,8 +159,11 @@ contract FlightSuretyApp {
         requireFundedAirline
         returns (bool success, uint256 votes)
     {
-        dataContract.registerAirline(airlineAddress, airlineName);
-        return (true, 0);
+        bool isRegistered = dataContract.registerAirline(airlineAddress, airlineName);
+        if (isRegistered) {
+            emit AirlineRegistered(airlineAddress, isRegistered);
+        }
+        return (isRegistered, 0);
     }
 
     function fundAirline() external requireRegisteredAirline requireSufficientFunds payable {
@@ -382,7 +395,7 @@ contract FlightSuretyApp {
 
 interface IFlightSuretyData {
     function registerAirline(address airlineAddress, string memory airlineName)
-        external;
+        external returns (bool);
 
     function fundAirline(address airlineAddress) external payable returns (bool);
 
