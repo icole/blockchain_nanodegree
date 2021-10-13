@@ -25,6 +25,8 @@ contract FlightSuretyApp {
     uint8 private constant STATUS_CODE_LATE_TECHNICAL = 40;
     uint8 private constant STATUS_CODE_LATE_OTHER = 50;
 
+    uint8 private constant AIRLINE_MULTIPARTY_THRESHOLD = 4;
+
     address private contractOwner; // Account used to deploy contract
 
     struct Flight {
@@ -33,8 +35,9 @@ contract FlightSuretyApp {
         uint256 updatedTimestamp;
         address airline;
     }
+    
     mapping(bytes32 => Flight) private flights;
-
+    mapping(address => address[]) private airlineVotes;
 
     event AirlineRegistered(
         address airlineAddress,
@@ -162,10 +165,28 @@ contract FlightSuretyApp {
         bool isRegistered = dataContract.isRegisteredAirline(airlineAddress);
         require(isRegistered == false, "Airline is already registered"); 
 
-        isRegistered = dataContract.registerAirline(airlineAddress, airlineName);
-        require(isRegistered == true, "Airline failed to register with data contract");
+        uint fundedCount = dataContract.fundedAirlineCount();
+        if (fundedCount >= AIRLINE_MULTIPARTY_THRESHOLD) {
+            uint voteThreshold = fundedCount / 2;
+            address[] memory currentVotes = airlineVotes[airlineAddress];
+            for(uint i = 0; i < currentVotes.length; i++) {
+                if (currentVotes[i] == msg.sender) {
+                    return (false, currentVotes.length);
+                }
+            }
+            airlineVotes[airlineAddress].push(msg.sender);
+            if (airlineVotes[airlineAddress].length >= voteThreshold) {
+                isRegistered = dataContract.registerAirline(airlineAddress, airlineName);
+                require(isRegistered == true, "Airline failed to register with data contract");
 
-        emit AirlineRegistered(airlineAddress, isRegistered);
+                emit AirlineRegistered(airlineAddress, isRegistered);                   
+            }
+        } else {
+            isRegistered = dataContract.registerAirline(airlineAddress, airlineName);
+            require(isRegistered == true, "Airline failed to register with data contract");
+
+            emit AirlineRegistered(airlineAddress, isRegistered);
+        }
         return (isRegistered, 0);
     }
 
