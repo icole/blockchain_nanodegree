@@ -128,12 +128,12 @@ contract FlightSuretyApp {
         return dataContract.isOperational();
     }
 
-    function getFlightDetails(address airline, string memory flight)
+    function getFlightDetails(address airline, string memory flight, uint256 timestamp)
         public
         view
         returns (bool isRegistered, uint256 statusCode)
     {
-        bytes32 key = getFlightKey(airline, flight);
+        bytes32 key = getFlightKey(airline, flight, timestamp);
         Flight memory flightRecord = flights[key];
         return (flightRecord.isRegistered, flightRecord.statusCode);
     }
@@ -159,10 +159,13 @@ contract FlightSuretyApp {
         requireFundedAirline
         returns (bool success, uint256 votes)
     {
-        bool isRegistered = dataContract.registerAirline(airlineAddress, airlineName);
-        if (isRegistered) {
-            emit AirlineRegistered(airlineAddress, isRegistered);
-        }
+        bool isRegistered = dataContract.isRegisteredAirline(airlineAddress);
+        require(isRegistered == false, "Airline is already registered"); 
+
+        isRegistered = dataContract.registerAirline(airlineAddress, airlineName);
+        require(isRegistered == true, "Airline failed to register with data contract");
+
+        emit AirlineRegistered(airlineAddress, isRegistered);
         return (isRegistered, 0);
     }
 
@@ -179,7 +182,7 @@ contract FlightSuretyApp {
      */
     function registerFlight(string memory flight, uint256 timestamp) external {
         address airline = msg.sender;
-        bytes32 key = getFlightKey(airline, flight);
+        bytes32 key = getFlightKey(airline, flight, timestamp);
         flights[key] = Flight({
             isRegistered: true,
             statusCode: STATUS_CODE_UNKNOWN,
@@ -198,7 +201,7 @@ contract FlightSuretyApp {
         uint256 timestamp,
         uint8 statusCode
     ) internal view {
-        bytes32 key = getFlightKey(airline, flight);
+        bytes32 key = getFlightKey(airline, flight, timestamp);
         Flight memory flightRecord = flights[key];
         flightRecord.statusCode = statusCode;
         flightRecord.updatedTimestamp = timestamp;
@@ -341,12 +344,12 @@ contract FlightSuretyApp {
         }
     }
 
-    function getFlightKey(address airline, string memory flight)
+    function getFlightKey(address airline, string memory flight, uint256 timestamp)
         internal
         pure
         returns (bytes32)
     {
-        return keccak256(abi.encodePacked(airline, flight));
+        return keccak256(abi.encodePacked(airline, flight, timestamp));
     }
 
     // Returns array of three non-duplicating integers from 0-9
@@ -404,4 +407,6 @@ interface IFlightSuretyData {
     function isFundedAirline(address airlineAddress) external returns (bool);
 
     function isOperational() external returns (bool);
+
+    function fundedAirlineCount() external returns (uint);
 }

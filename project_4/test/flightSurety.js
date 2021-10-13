@@ -1,6 +1,7 @@
 var Test = require("../config/testConfig.js");
 var BigNumber = require("bignumber.js");
 var truffleAssert = require("truffle-assertions");
+const { SingleEntryPlugin } = require("webpack");
 
 contract("Flight Surety Tests", async (accounts) => {
   var config;
@@ -189,7 +190,7 @@ contract("Flight Surety Tests", async (accounts) => {
     );
 
     // ASSERT
-    // Watch the emitted event AirlineFunded()
+    // Watch the emitted event AirlineRegistered()
     truffleAssert.eventEmitted(tx, "AirlineRegistered", (ev) => {
       return (
         ev.airlineAddress == unregisteredAirline && ev.isRegistered == true
@@ -200,6 +201,38 @@ contract("Flight Surety Tests", async (accounts) => {
         unregisteredAirline
       );
     assert.equal(airlineRegistered, true, "Airline should be registered");
+  });
+
+  it("(airline) cannot register an already registered Airline", async () => {
+    // ARRANGE
+    let reverted = false;
+    let fundedAirline = accounts[2];
+    let airlineFunded = await config.flightSuretyApp.isFundedAirline.call(
+      fundedAirline
+    );
+    assert.equal(airlineFunded, true, "Airline should be funded");
+
+    let registeredAirline = accounts[3];
+    isRegisteredAirline = await config.flightSuretyData.isRegisteredAirline(
+      registeredAirline
+    );
+    assert.equal(isRegisteredAirline, true, "Airline should be registered");
+
+    // ACT
+    try {
+      await config.flightSuretyApp.registerAirline.call(
+        registeredAirline,
+        "Foo Fighter Airlines",
+        {
+          from: fundedAirline,
+        }
+      );
+    } catch (e) {
+      reverted = true;
+    }
+
+    // ASSERT
+    assert.equal(reverted, true, "Registered should throw an error");
   });
 
   it("(airline) cannot be funded if it is not registered", async () => {
@@ -213,6 +246,59 @@ contract("Flight Surety Tests", async (accounts) => {
       false,
       "Airline should not be registered"
     );
+
+    // ACT
+    let tx = await config.flightSuretyApp.fundAirline({
+      from: unregisteredAirline,
+      value: web3.utils.toWei("10", "ether"),
+    });
+
+    // ASSERT
+    // Watch the emitted event AirlineFunded()
+    truffleAssert.eventNotEmitted(tx, "AirlineFunded", (ev) => {
+      return ev.airlineAddress == unregisteredAirline && ev.isFunded == true;
+    });
+    let airlineFunded = await config.flightSuretyApp.isFundedAirline.call(
+      unregisteredAirline
+    );
+    assert.equal(airlineFunded, false, "Airline should not be funded");
+  });
+
+  it("(airline) requires 50% registration votes after 4 registered airlines", async () => {
+    // ARRANGE
+    let airline, isRegisteredAirline, isFundedAirline, registreredAirlineCount;
+    let response;
+    for (let i = 1; i < 5; i++) {
+      airline = accounts[i];
+      isRegisteredAirline = await config.flightSuretyData.isRegisteredAirline(
+        airline
+      );
+      if (!isRegisteredAirline) {
+        await config.flightSuretyApp.registerAirline.call(
+          airline,
+          `Foo Fighter Airlines ${i}`,
+          {
+            from: config.owner,
+          }
+        );
+        isRegisteredAirline = await config.flightSuretyData.isRegisteredAirline(
+          airline
+        );
+      }
+      registreredAirlineCount =
+        await config.flightSuretyData.registeredAirlineCount();
+      console.log(registreredAirlineCount);
+
+      isFundedAirline = await config.flightSuretyData.isFundedAirline(airline);
+      if (!isFundedAirline) {
+        await config.flightSuretyApp.fundAirline.call({
+          from: airline,
+          value: web3.utils.toWei("10", "ether"),
+        });
+      }
+    }
+    let fundedAirlineCount = await config.flightSuretyData.fundedAirlineCount();
+    assert.equal(fundedAirlineCount, 5, "There should be 4 Airlines");
 
     // ACT
     let tx = await config.flightSuretyApp.fundAirline({

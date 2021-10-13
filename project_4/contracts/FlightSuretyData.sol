@@ -20,7 +20,9 @@ contract FlightSuretyData {
         bool isFunded;
     }
 
-    mapping(address => Airline) private registeredAirlines; // Registered Airlines
+    mapping(address => Airline) private airlines; // All Airlines
+    address[] private registeredAirlines; // Registered Airlines;
+    address[] private fundedAirlines; // Funded Airlines
 
     /********************************************************************************************/
     /*                                       EVENT DEFINITIONS                                  */
@@ -87,7 +89,7 @@ contract FlightSuretyData {
      * @return A bool that is whether the airline is registered or not
      */
     function isRegisteredAirline(address airline) public view returns (bool) {
-        return registeredAirlines[airline].isRegistered;
+        return airlines[airline].isRegistered;
     }
 
     /**
@@ -96,7 +98,7 @@ contract FlightSuretyData {
      * @return A bool that is whether the airline is funded or not
      */
     function isFundedAirline(address airline) public view returns (bool) {
-        return registeredAirlines[airline].isFunded;
+        return airlines[airline].isFunded;
     }
 
     /**
@@ -110,8 +112,18 @@ contract FlightSuretyData {
     }
 
     /**
-      
+     * @dev Returns count of funded Airlines
      */
+    function fundedAirlineCount() public view returns (uint) {
+        return fundedAirlines.length;
+    }
+
+    /**
+     * @dev Returns count of registered Airlines
+     */
+    function registeredAirlineCount() public view returns (uint) {
+        return registeredAirlines.length;
+    }
 
     /********************************************************************************************/
     /*                                     SMART CONTRACT FUNCTIONS                             */
@@ -130,7 +142,8 @@ contract FlightSuretyData {
             isRegistered: true,
             isFunded: false
         });
-        registeredAirlines[airlineAddress] = newAirline;
+        airlines[airlineAddress] = newAirline;
+        registeredAirlines.push(airlineAddress);
         return newAirline.isRegistered;
     }
 
@@ -138,9 +151,10 @@ contract FlightSuretyData {
      * @dev Fund a particular airline
      */
     function fundAirline(address airlineAddress) external payable returns (bool) {
-        Airline memory airline = registeredAirlines[airlineAddress];
+        Airline memory airline = airlines[airlineAddress];
         airline.isFunded = true;
-        registeredAirlines[airlineAddress] = airline;
+        airlines[airlineAddress] = airline;
+        fundedAirlines.push(airlineAddress);
         return airline.isFunded;
     }
 
