@@ -12,7 +12,8 @@ export default class Contract {
     );
     this.initialize(callback);
     this.owner = null;
-    this.airlines = ['0xf17f52151EbEF6C7334FAD080c5704D77216b732'];
+    this.flights = ["AA123", "DAL4343", "BA56", "AS654"];
+    this.airlines = [];
     this.passengers = [];
   }
 
@@ -21,13 +22,35 @@ export default class Contract {
       this.owner = accts[0];
 
       let counter = 1;
+      let airlineAddress, passengerAddress;
+
+      const airlineSelect = document.getElementById("airline-address");
+      const flightSelect = document.getElementById("flight-number");
+      const passengerSelect = document.getElementById("passenger-address");
 
       while (this.airlines.length < 5) {
-        this.airlines.push(accts[counter++]);
+        airlineAddress = accts[counter++];
+        airlineSelect.options[airlineSelect.options.length] = new Option(
+          airlineAddress,
+          airlineAddress
+        );
+        this.airlines.push(airlineAddress);
       }
 
-      while (this.passengers.length < 5) {
-        this.passengers.push(accts[counter++]);
+      this.flights.forEach((flight) => {
+        flightSelect.options[flightSelect.options.length] = new Option(
+          flight,
+          flight
+        );
+      });
+
+      while (this.passengers.length < 4) {
+        passengerAddress = accts[counter++];
+        passengerSelect.options[passengerSelect.options.length] = new Option(
+          passengerAddress,
+          passengerAddress
+        );
+        this.passengers.push(passengerAddress);
       }
 
       callback();

@@ -32,14 +32,40 @@
 
     <main class="container">
       <div id="display-wrapper" class="top-20"></div>
-      
+
+      <div class="row top-20">
+        <label class="form">Airline</label>
+        <select id="airline-address"></select>
+        <div class="buttons">
+          <btn class="btn btn-primary" id="register-airline">Register</btn>
+          <btn class="btn btn-primary" id="fund-airline">Fund</btn>
+          <btn class="btn btn-primary" id="find-airline">Find</btn>
+        </div>
+      </div>
+
       <div class="row top-20">
         <label class="form">Flight</label>
-        <input type="text" id="flight-number" />
+        <select id="flight-number"></select>
         <div class="buttons">
           <btn class="btn btn-primary" id="register-flight">Register</btn>
-          <btn class="btn btn-primary" id="find-flight">Find Registration</btn>
-          <btn class="btn btn-primary" id="submit-oracle">Submit to Oracles</btn>
+          <btn class="btn btn-primary" id="find-flight">Find</btn>
+          <btn class="btn btn-primary" id="submit-oracle"
+            >Submit to Oracles</btn
+          >
+        </div>
+      </div>
+
+      <div class="row top-20">
+        <label class="form">Passenger</label>
+        <select id="passenger-address"></select>
+        <div class="buttons">
+          <btn class="btn btn-primary" id="insure-flight"
+            >Purchase Insurance</btn
+          >
+          <btn class="btn btn-primary" id="check-balance">Check Balance</btn>
+          <btn class="btn btn-primary" id="transfer-balance"
+            >Transfer Balance</btn
+          >
         </div>
       </div>
     </main>
