@@ -17,36 +17,49 @@ let FlightSuretyApp = contract(
 
 FlightSuretyApp.setProvider(provider);
 
-async function registerOracles() {
+async function registerOracles(oracleAccounts = []) {
   let flightSuretyApp = await FlightSuretyApp.deployed();
-  let accounts = await web3.eth.getAccounts();
-  // Use all accounts after for the first 10 reserved for Airlines / Passengers
-  let oracleAccounts = accounts.slice(10, 12);
   let fee = await flightSuretyApp.REGISTRATION_FEE.call();
-
-  let indexes;
-  oracleAccounts.forEach(async (account) => {
-    await flightSuretyApp.registerOracle({
+  let indexes, indexAccounts, account;
+  let indexesToAccounts = {};
+  for (let i = 0; i < oracleAccounts.length; i++) {
+    account = oracleAccounts[i];
+    indexes = await flightSuretyApp.registerOracle.call({
       from: account,
       value: fee,
     });
-    indexes = await flightSuretyApp.getMyIndexes.call({
-      from: account,
+    indexes.forEach((index) => {
+      index = index.toNumber();
+      indexAccounts = indexesToAccounts[index] || [];
+      indexAccounts.push(account);
+      indexesToAccounts[index] = indexAccounts;
     });
-    console.log(
-      `Oracle Registered: ${indexes[0]}, ${indexes[1]}, ${indexes[2]}`
-    );
-  });
+  }
+  return indexesToAccounts;
+}
+
+async function setupOracles() {
+  let flightSuretyApp = await FlightSuretyApp.deployed();
+  let accounts = await web3.eth.getAccounts();
+  // Use all accounts after for the first 10 reserved for Airlines / Passengers
+  let oracleAccounts = accounts.slice(10, -1);
+
+  let indexesToAccounts = await registerOracles(oracleAccounts);
 
   const requestEvent = flightSuretyApp.OracleRequest({
     fromBlock: 0,
   });
+
+  let requestedOracles, requestedIndex;
   requestEvent.on("data", (result) => {
-    console.log(result.args.index.toString());
+    requestedIndex = result.args.index.toString();
+    requestedOracles = indexesToAccounts[requestedIndex];
+    console.log(`Requested Index: ${requestedIndex}`);
+    console.log(`Found oracles: ${requestedOracles.length}`);
   });
 }
 
-registerOracles();
+setupOracles();
 
 const app = express();
 app.get("/api", (req, res) => {
