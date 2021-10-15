@@ -127,7 +127,6 @@ export default class Contract {
 
   async getAirlineDetails(airline, callback) {
     let self = this;
-    console.log(airline);
     self.flightSuretyApp.methods
       .getAirlineDetails(airline)
       .call(
@@ -148,6 +147,20 @@ export default class Contract {
           callback(error, result);
         }
       );
+  }
+
+  fundAirline(airlineAddress, callback) {
+    let self = this;
+    self.flightSuretyApp.methods.fundAirline().send(
+      {
+        from: airlineAddress,
+        gasLimit: 999999999,
+        value: Web3.utils.toWei("10", "ether"),
+      },
+      (error, result) => {
+        callback(error, result);
+      }
+    );
   }
 
   fetchFlightStatus(airline, flight, timestamp, callback) {
@@ -171,6 +184,7 @@ export default class Contract {
       flight: flight,
       timestamp: timestamp,
     };
+    console.log(this.currentAccount);
     self.flightSuretyApp.methods
       .registerFlight(payload.flight, payload.timestamp)
       .send(
@@ -191,5 +205,32 @@ export default class Contract {
           callback(error, result);
         }
       );
+  }
+
+  purchaseInsurance(airline, flight, timestamp, callback) {
+    this.flightSuretyApp.methods
+      .purchaseInsurance(airline, flight, timestamp)
+      .send(
+        { from: this.currentAccount, value: Web3.utils.toWei("1", "ether") },
+        (error, result) => {
+          callback(error, result);
+        }
+      );
+  }
+
+  getPendingPayout(callback) {
+    this.flightSuretyApp.methods
+      .getPendingPayout()
+      .call({ from: this.currentAccount }, (error, result) => {
+        callback(error, result);
+      });
+  }
+
+  transferPayout(callback) {
+    this.flightSuretyApp.methods
+      .transferPayout()
+      .send({ from: this.currentAccount }, (error, result) => {
+        callback(error, result);
+      });
   }
 }

@@ -20,9 +20,23 @@ contract FlightSuretyData {
         bool isFunded;
     }
 
+    struct Passenger {
+        address passenger;
+        uint amount;
+    }
+
     mapping(address => Airline) private airlines; // All Airlines
+    mapping(bytes32 => Passenger[]) private flightPassengers;
+    mapping(address => uint) private passengerPayouts;
+
     address[] private registeredAirlines; // Registered Airlines;
     address[] private fundedAirlines; // Funded Airlines
+
+
+    event PassengerCredited(
+        address passenger,
+        uint amount
+    );
 
     /********************************************************************************************/
     /*                                       EVENT DEFINITIONS                                  */
@@ -60,6 +74,14 @@ contract FlightSuretyData {
         require(msg.sender == contractOwner, "Caller is not contract owner");
         _;
     }
+
+    /**
+     * @dev Modifier that requires the caller to be pre-authorized app contract
+     */
+     modifier requireAppContract() {
+         require(msg.sender == appContractAddress, "Caller is not app contract");
+         _;
+     }
 
     /********************************************************************************************/
     /*                                       UTILITY FUNCTIONS                                  */
@@ -134,6 +156,13 @@ contract FlightSuretyData {
         return registeredAirlines.length;
     }
 
+    /**
+     * @dev Returns amount pending for payout to passenger
+     */
+    function pendingPayout(address passenger) public view returns (uint) {
+        return passengerPayouts[passenger];
+    }
+
     /********************************************************************************************/
     /*                                     SMART CONTRACT FUNCTIONS                             */
     /********************************************************************************************/
@@ -143,8 +172,8 @@ contract FlightSuretyData {
      *      Can only be called from FlightSuretyApp contract
      *
      */
-    function registerAirline(address airlineAddress, string memory airlineName)
-        external returns (bool)
+    function registerAirline(address airlineAddress, string memory airlineName) external 
+        requireIsOperational requireAppContract returns (bool)
     {
         Airline memory newAirline = Airline({
             name: airlineName,
@@ -159,7 +188,9 @@ contract FlightSuretyData {
     /**
      * @dev Fund a particular airline
      */
-    function fundAirline(address airlineAddress) external payable returns (bool) {
+    function fundAirline(address airlineAddress) external 
+        requireIsOperational requireAppContract payable returns (bool)
+    {
         Airline memory airline = airlines[airlineAddress];
         airline.isFunded = true;
         airlines[airlineAddress] = airline;
@@ -171,18 +202,41 @@ contract FlightSuretyData {
      * @dev Buy insurance for a flight
      *
      */
-    function buy() external payable {}
+    function buy(bytes32 key, address passenger) external
+        requireIsOperational requireAppContract payable
+    {
+        flightPassengers[key].push(Passenger({
+            passenger: passenger,
+            amount: msg.value
+        }));
+    }
 
     /**
      *  @dev Credits payouts to insurees
      */
-    function creditInsurees() external pure {}
+    function creditInsurees(bytes32 key) external
+        requireIsOperational requireAppContract 
+    {
+        Passenger[] memory passengers = flightPassengers[key];
+        for (uint i=0; i<passengers.length; i++) {
+            address passenger = passengers[i].passenger;
+            uint payoutAmount = passengers[i].amount * 3 / 2;
+            passengerPayouts[passengers[i].passenger] += payoutAmount;
+            emit PassengerCredited(passenger, payoutAmount);
+        }
+    }
 
     /**
      *  @dev Transfers eligible payout funds to insuree
      *
      */
-    function pay() external pure {}
+    function pay(address payable passenger) external
+        requireIsOperational requireAppContract
+    {
+        uint payoutAmount = passengerPayouts[passenger];
+        passengerPayouts[passenger] = 0;
+        passenger.transfer(payoutAmount);
+    }
 
     /**
      * @dev Initial funding for the insurance. Unless there are too many delayed flights

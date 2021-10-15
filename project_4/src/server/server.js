@@ -54,11 +54,10 @@ async function setupOracles() {
   let flightSuretyApp = await FlightSuretyApp.deployed();
   let accounts = await web3.eth.getAccounts();
   // Use all accounts after for the first 10 reserved for Airlines / Passengers
-  let oracleAccounts = accounts.slice(10, 20);
+  let oracleAccounts = accounts.slice(10, 30);
 
   await registerOracles(oracleAccounts);
   let indexesToAccounts = await storeOracleIndexes(oracleAccounts);
-  console.log("Indexes To Accounts", indexesToAccounts);
 
   const requestEvent = flightSuretyApp.OracleRequest({
     fromBlock: 0,
@@ -93,6 +92,7 @@ async function setupOracles() {
           randomStatus,
           {
             from: oracle,
+            gasLimit: 9999999,
           }
         );
       } catch (e) {

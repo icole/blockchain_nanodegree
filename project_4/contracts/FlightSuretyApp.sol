@@ -38,6 +38,7 @@ contract FlightSuretyApp {
     
     mapping(bytes32 => Flight) private flights;
     mapping(address => address[]) private airlineVotes;
+    mapping(bytes32 => bool) private processedFlights;
 
     event AirlineRegistered(
         address airlineAddress,
@@ -169,6 +170,10 @@ contract FlightSuretyApp {
         return dataContract.isFundedAirline(airlineAddress);
     }
 
+    function getPendingPayout() public returns (uint) {
+        return dataContract.pendingPayout(msg.sender);
+    }
+
     /********************************************************************************************/
     /*                                     SMART CONTRACT FUNCTIONS                             */
     /********************************************************************************************/
@@ -234,6 +239,26 @@ contract FlightSuretyApp {
     }
 
     /**
+     * @dev Alows for passenger insurance purchasing
+     */
+     function purchaseInsurance(address airline, string memory flight, uint256 timestamp) external payable {
+        bytes32 key = getFlightKey(airline, flight, timestamp);
+        require(flights[key].isRegistered == true, "Flight is not registered");
+        require(flights[key].statusCode == STATUS_CODE_UNKNOWN, "Can not purchase insurance for flight with status set");
+
+        dataContract.buy{value: msg.value}(key, msg.sender);
+     }
+
+     /**
+     * @dev Alows for passenger to transfer any pending payout to themselves 
+     */
+     function transferPayout() external {
+        dataContract.pay(payable (msg.sender));
+     }
+
+    
+
+    /**
      * @dev Called after oracle has updated flight status
      *
      */
@@ -250,8 +275,11 @@ contract FlightSuretyApp {
         flights[key] = flightRecord;
 
         // Issue insurance payout to passengers if status is due to Airline
-        if(statusCode == STATUS_CODE_LATE_AIRLINE) {
+        if(statusCode == STATUS_CODE_LATE_AIRLINE && !processedFlights[key]) {
+            processedFlights[key] = true;
             emit TriggerPassengerInsurance(airline, flight, timestamp);
+
+            dataContract.creditInsurees(key);
         }
     }
 
@@ -377,9 +405,12 @@ contract FlightSuretyApp {
             "Index does not match oracle request"
         );
 
-        bytes32 key = keccak256(
-            abi.encodePacked(index, airline, flight, timestamp)
-        );
+        bytes32 key;
+        unchecked {
+            key = keccak256(
+                abi.encodePacked(index, airline, flight, timestamp)
+            );
+        }
         require(
             oracleResponses[key].isOpen,
             "Flight or timestamp do not match oracle request"
@@ -435,13 +466,16 @@ contract FlightSuretyApp {
         uint8 maxValue = 10;
 
         // Pseudo random number...the incrementing nonce adds variation
-        uint8 random = uint8(
-            uint256(
-                keccak256(
-                    abi.encodePacked(blockhash(block.number - nonce++), account)
-                )
-            ) % maxValue
-        );
+        uint8 random;
+        unchecked {
+            random = uint8(
+                uint256(
+                    keccak256(
+                        abi.encodePacked(blockhash(block.number - nonce++), account)
+                    )
+                ) % maxValue
+            );
+        }
 
         if (nonce > 250) {
             nonce = 0; // Can only fetch blockhashes for last 256 blocks so we adapt
@@ -468,4 +502,12 @@ interface IFlightSuretyData {
     function isOperational() external returns (bool);
 
     function fundedAirlineCount() external returns (uint);
+
+    function buy(bytes32 key, address passenger) external payable;
+
+    function creditInsurees(bytes32 key) external;
+
+    function pay(address payable passenger) external;
+
+    function pendingPayout(address passenger) external returns (uint);
 }

@@ -29,6 +29,21 @@ import "./flightsurety.css";
       });
     });
 
+    DOM.elid("fund-airline").addEventListener("click", () => {
+      let airline = DOM.elid("airline-address").value;
+      let [airlineAddress, airlineName] = airline.split(",");
+
+      contract.fundAirline(airlineAddress, (error, result) => {
+        display("Airline", `Details For: ${airlineName}`, [
+          {
+            label: "Funding Details",
+            error: error?.message,
+            value: `Result: ${result}`,
+          },
+        ]);
+      });
+    });
+
     DOM.elid("find-airline").addEventListener("click", () => {
       let airline = DOM.elid("airline-address").value;
       let [airlineAddress, airlineName] = airline.split(",");
@@ -71,7 +86,6 @@ import "./flightsurety.css";
     DOM.elid("find-flight").addEventListener("click", () => {
       let flight = DOM.elid("flight-number").value;
       let [airline, flightNumber, timestamp] = flight.split(",");
-      console.log(airline, flightNumber, timestamp);
 
       contract.getFlightDetails(
         airline,
@@ -94,7 +108,6 @@ import "./flightsurety.css";
     DOM.elid("register-flight").addEventListener("click", () => {
       let flight = DOM.elid("flight-number").value;
       let [airline, flightNumber, timestamp] = flight.split(",");
-      console.log(airline, flightNumber, timestamp);
 
       contract.registerFlight(
         airline,
@@ -110,6 +123,50 @@ import "./flightsurety.css";
           ]);
         }
       );
+    });
+
+    DOM.elid("purchase-insurance").addEventListener("click", () => {
+      let flight = DOM.elid("flight-number").value;
+      let [airline, flightNumber, timestamp] = flight.split(",");
+
+      contract.purchaseInsurance(
+        airline,
+        flightNumber,
+        timestamp,
+        (error, result) => {
+          display("Passenger", "Insurance", [
+            {
+              label: "Insurance Details",
+              error: error?.message,
+              value: `${result}`,
+            },
+          ]);
+        }
+      );
+    });
+
+    DOM.elid("check-balance").addEventListener("click", () => {
+      contract.getPendingPayout((error, result) => {
+        display("Passenger", "Payout", [
+          {
+            label: "Pending Payout Details",
+            error: error?.message,
+            value: `${result}`,
+          },
+        ]);
+      });
+    });
+
+    DOM.elid("transfer-balance").addEventListener("click", () => {
+      contract.transferPayout((error, result) => {
+        display("Passenger", "Payout", [
+          {
+            label: "Payout Details",
+            error: error?.message,
+            value: `${result}`,
+          },
+        ]);
+      });
     });
   });
 })();
