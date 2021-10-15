@@ -102,6 +102,15 @@ contract FlightSuretyData {
     }
 
     /**
+     * @dev Returns status fields for a particular Airline
+     *
+     * @return bool for registration and bool for funded
+     */
+    function getAirlineDetails(address airline) public view returns (bool, bool) {
+        return (airlines[airline].isRegistered, airlines[airline].isFunded);
+    }
+
+    /**
      * @dev Sets the App contract address authorized to call this contract
      */
     function setAppContract(address _appContractAddress)

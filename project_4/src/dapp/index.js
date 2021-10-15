@@ -14,48 +14,102 @@ import "./flightsurety.css";
       ]);
     });
 
-    // User-submitted transaction
-    DOM.elid("submit-oracle").addEventListener("click", () => {
-      let flight = DOM.elid("flight-number").value;      
+    DOM.elid("register-airline").addEventListener("click", () => {
+      let airline = DOM.elid("airline-address").value;
+      let [airlineAddress, airlineName] = airline.split(",");
 
-      // Write transaction
-      contract.fetchFlightStatus(flight, (error, result) => {
-        display("Oracles", "Trigger oracles", [
+      contract.registerAirline(airlineAddress, airlineName, (error, result) => {
+        display("Airline", "Registration", [
           {
-            label: "Fetch Flight Status",
-            error: error,
-            value: result.flight + " " + result.timestamp,
+            label: "Registration Details",
+            error: error?.message,
+            value: `Result: ${result}`,
           },
         ]);
       });
     });
 
-    DOM.elid("find-flight").addEventListener("click", () => {
-      let flight = DOM.elid("flight-number").value;      
+    DOM.elid("find-airline").addEventListener("click", () => {
+      let airline = DOM.elid("airline-address").value;
+      let [airlineAddress, airlineName] = airline.split(",");
 
-      contract.getFlightDetails(flight, (error, result) => {
-        display(`Flight ${flight}`, "Status Details", [
+      contract.getAirlineDetails(airlineAddress, (error, result) => {
+        display("Airline", `Details For: ${airlineName}`, [
           {
             label: "Status Details",
             error: error,
-            value: `Registered: ${result.isRegistered}, Status Code: ${result.statusCode}`,
+            value: `Registered: ${result?.isRegistered || false}, Funded: ${
+              result?.isFunded || false
+            }`,
           },
         ]);
       });
     });
 
-    DOM.elid("register-flight").addEventListener("click", () => {
-      let flight = DOM.elid("flight-number").value;      
+    // User-submitted transaction
+    DOM.elid("submit-oracle").addEventListener("click", () => {
+      let flight = DOM.elid("flight-number").value;
+      let [airline, flightNumber, timestamp] = flight.split(",");
 
-      contract.registerFlight(flight, (error, result) => {
-        display(`Flight ${flight}`, "Registration", [
-          {
-            label: "Registration Details",
-            error: error,
-            value: `Airline: ${result.airline}, Flight: ${result.flight}, Timestamp: ${result.timestamp}`,
-          },
-        ]);
-      });
+      // Write transaction
+      contract.fetchFlightStatus(
+        airline,
+        flightNumber,
+        timestamp,
+        (error, result) => {
+          display("Oracles", "Trigger oracles", [
+            {
+              label: "Fetch Flight Status",
+              error: error?.message,
+              value: result.flight + " " + result.timestamp,
+            },
+          ]);
+        }
+      );
+    });
+
+    DOM.elid("find-flight").addEventListener("click", () => {
+      let flight = DOM.elid("flight-number").value;
+      let [airline, flightNumber, timestamp] = flight.split(",");
+      console.log(airline, flightNumber, timestamp);
+
+      contract.getFlightDetails(
+        airline,
+        flightNumber,
+        timestamp,
+        (error, result) => {
+          display("Flight", `Details For: ${flight}`, [
+            {
+              label: "Status Details",
+              error: error,
+              value: `Registered: ${
+                result?.isRegistered || false
+              }, Status Code: ${result?.statusCode}`,
+            },
+          ]);
+        }
+      );
+    });
+
+    DOM.elid("register-flight").addEventListener("click", () => {
+      let flight = DOM.elid("flight-number").value;
+      let [airline, flightNumber, timestamp] = flight.split(",");
+      console.log(airline, flightNumber, timestamp);
+
+      contract.registerFlight(
+        airline,
+        flightNumber,
+        timestamp,
+        (error, result, payload) => {
+          display("Flight", "Registration", [
+            {
+              label: "Registration Details",
+              error: error?.message,
+              value: `Tx: ${result}, Airline: ${payload.airline}, Flight: ${payload.flight}, Timestamp: ${payload.timestamp}`,
+            },
+          ]);
+        }
+      );
     });
   });
 })();
@@ -76,5 +130,5 @@ function display(title, description, results) {
     );
     section.appendChild(row);
   });
-  displayDiv.append(section);
+  displayDiv.prepend(section);
 }

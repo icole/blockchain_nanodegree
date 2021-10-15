@@ -7,6 +7,7 @@
       content="width=device-width, initial-scale=1, shrink-to-fit=no"
     />
     <title>FlightSurety</title>
+    <script src="https://unpkg.com/@metamask/legacy-web3@latest/dist/metamask.web3.min.js"></script>
     <link
       href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.1/css/bootstrap.min.css"
       rel="stylesheet"
@@ -30,9 +31,7 @@
       </button>
     </nav>
 
-    <main class="container">
-      <div id="display-wrapper" class="top-20"></div>
-
+    <div class="container">
       <div class="row top-20">
         <label class="form">Airline</label>
         <select id="airline-address"></select>
@@ -68,6 +67,12 @@
           >
         </div>
       </div>
+
+      <br/>
+      <br/>
+      <h1>Transaction Log:</h1>
+      <br/>
+      <div id="display-wrapper" class="top-20"></div>
     </main>
   </body>
 </html>

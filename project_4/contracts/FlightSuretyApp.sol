@@ -49,6 +49,19 @@ contract FlightSuretyApp {
         bool isFunded
     );
 
+    event FlightRegistered(
+        bytes32 key,
+        address airline,
+        string flight,
+        uint timestamp
+    );
+
+    event TriggerPassengerInsurance(
+        address airline,
+        string flight,
+        uint timestamp
+    );
+
     IFlightSuretyData private dataContract;
 
     /********************************************************************************************/
@@ -131,6 +144,13 @@ contract FlightSuretyApp {
         return dataContract.isOperational();
     }
 
+    function getAirlineDetails(address airlineAddress)
+        public
+        returns (bool isRegistered, bool isFunded)
+    {
+        return dataContract.getAirlineDetails(airlineAddress);
+    }
+
     function getFlightDetails(address airline, string memory flight, uint256 timestamp)
         public
         view
@@ -201,7 +221,7 @@ contract FlightSuretyApp {
      * @dev Register a future flight for insuring.
      *
      */
-    function registerFlight(string memory flight, uint256 timestamp) external {
+    function registerFlight(string memory flight, uint256 timestamp) external requireFundedAirline {
         address airline = msg.sender;
         bytes32 key = getFlightKey(airline, flight, timestamp);
         flights[key] = Flight({
@@ -210,6 +230,7 @@ contract FlightSuretyApp {
             updatedTimestamp: timestamp,
             airline: airline
         });
+        emit FlightRegistered(key, airline, flight, timestamp);
     }
 
     /**
@@ -221,11 +242,17 @@ contract FlightSuretyApp {
         string memory flight,
         uint256 timestamp,
         uint8 statusCode
-    ) internal view {
+    ) internal {
         bytes32 key = getFlightKey(airline, flight, timestamp);
         Flight memory flightRecord = flights[key];
         flightRecord.statusCode = statusCode;
         flightRecord.updatedTimestamp = timestamp;
+        flights[key] = flightRecord;
+
+        // Issue insurance payout to passengers if status is due to Airline
+        if(statusCode == STATUS_CODE_LATE_AIRLINE) {
+            emit TriggerPassengerInsurance(airline, flight, timestamp);
+        }
     }
 
     // Generate a request for oracles to fetch flight information
@@ -292,7 +319,8 @@ contract FlightSuretyApp {
         address airline,
         string flight,
         uint256 timestamp,
-        uint8 status
+        uint8 status,
+        uint responseCount
     );
 
     // Event fired when flight status request is submitted
@@ -305,8 +333,13 @@ contract FlightSuretyApp {
         uint256 timestamp
     );
 
+    event OracleRegistered(
+        address oracle,
+        uint8[3] indexes
+    );
+
     // Register an oracle with the contract
-    function registerOracle() external payable returns (uint8[3] memory) {
+    function registerOracle() external payable {
         // Require registration fee
         require(msg.value >= REGISTRATION_FEE, "Registration fee is required");
 
@@ -314,7 +347,7 @@ contract FlightSuretyApp {
 
         oracles[msg.sender] = Oracle({isRegistered: true, indexes: indexes});
 
-        return indexes;
+        emit OracleRegistered(msg.sender, indexes);
     }
 
     function getMyIndexes() external view returns (uint8[3] memory) {
@@ -353,12 +386,13 @@ contract FlightSuretyApp {
         );
 
         oracleResponses[key].responses[statusCode].push(msg.sender);
+        uint responseCount = oracleResponses[key].responses[statusCode].length;
 
         // Information isn't considered verified until at least MIN_RESPONSES
         // oracles respond with the *** same *** information
-        emit OracleReport(airline, flight, timestamp, statusCode);
+        emit OracleReport(airline, flight, timestamp, statusCode, responseCount);
         if (
-            oracleResponses[key].responses[statusCode].length >= MIN_RESPONSES
+            responseCount >= MIN_RESPONSES
         ) {
             emit FlightStatusInfo(airline, flight, timestamp, statusCode);
 
@@ -424,6 +458,8 @@ interface IFlightSuretyData {
         external returns (bool);
 
     function fundAirline(address airlineAddress) external payable returns (bool);
+
+    function getAirlineDetails(address airlineAddress) external returns (bool, bool);
 
     function isRegisteredAirline(address airlineAddress) external returns (bool);
 
