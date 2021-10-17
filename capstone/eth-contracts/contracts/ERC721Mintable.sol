@@ -13,8 +13,8 @@ abstract contract Ownable {
 
     event OwnerTransfer(address owner);
 
-    constructor(address owner) {
-        _owner = owner;
+    constructor(address owner_) {
+        _owner = owner_;
         emit OwnerTransfer(_owner);
     }
 
