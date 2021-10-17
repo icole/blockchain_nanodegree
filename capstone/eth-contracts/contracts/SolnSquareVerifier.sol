@@ -4,21 +4,12 @@ pragma solidity ^0.8.7;
 
 import "./ERC721Mintable.sol";
 
-// TODO define a solutions struct that can hold an index & an address
-
-// TODO define an array of the above struct
-
-// TODO define a mapping to store unique solutions submitted
-
-// TODO Create an event to emit when a solution is added
-
-// TODO Create a function to add the solutions to the array and emit the event
-
-// TODO Create a function to mint new NFT only after the solution has been verified
-//  - make sure the solution is unique (has not been used before)
-//  - make sure you handle metadata as well as tokenSuplly
 contract SolnSquareVerifier is ERC721Mintable {
     ISquareVerifier private squareVerifier;
+
+    mapping(bytes32 => bool) private _usedSolutions;
+
+    event SolutionAdded(bytes32 solutionHash);
 
     constructor(
         address verifierAddress,
@@ -28,12 +19,54 @@ contract SolnSquareVerifier is ERC721Mintable {
         squareVerifier = ISquareVerifier(verifierAddress);
     }
 
-    function verify(ISquareVerifier.Proof memory proof, uint256[2] memory input)
-        internal
-        view
-        returns (bool r)
-    {
+    function _verify(
+        ISquareVerifier.Proof memory proof,
+        uint256[2] memory input
+    ) internal view returns (bool r) {
         return squareVerifier.verifyTx(proof, input);
+    }
+
+    function _addSolution(bytes32 solutionHash_) internal {
+        _usedSolutions[solutionHash_] = true;
+        emit SolutionAdded(solutionHash_);
+    }
+
+    function _solutionHash(
+        ISquareVerifier.Proof memory proof,
+        uint256[2] memory input
+    ) internal pure returns (bytes32) {
+        return
+            keccak256(
+                abi.encodePacked(
+                    proof.a.X,
+                    proof.a.Y,
+                    proof.b.X,
+                    proof.b.Y,
+                    proof.c.X,
+                    proof.c.Y,
+                    input
+                )
+            );
+    }
+
+    function mint(
+        ISquareVerifier.Proof memory proof,
+        uint256[2] memory inputs,
+        address to,
+        uint256 tokenId
+    ) external returns (bool) {
+        bytes32 solutionHash = _solutionHash(proof, inputs);
+        require(
+            _usedSolutions[solutionHash] == false,
+            "Solution has already been used"
+        );
+        _addSolution(solutionHash);
+        require(
+            _verify(proof, inputs) == true,
+            "Solution failed to be verified"
+        );
+
+        return super.mint(to, tokenId);
     }
 }
 

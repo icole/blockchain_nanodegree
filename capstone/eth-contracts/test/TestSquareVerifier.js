@@ -1,7 +1,6 @@
 const fs = require("fs");
 const SquareVerifier = artifacts.require("SquareVerifier");
 const correctProof = JSON.parse(fs.readFileSync("./proof.json"));
-const incorrectProof = JSON.parse(fs.readFileSync("./failing_proof.json"));
 
 contract("TestSquareVerifier", (accounts) => {
   beforeEach(async function () {
@@ -13,14 +12,18 @@ contract("TestSquareVerifier", (accounts) => {
       correctProof.proof,
       correctProof.inputs
     );
-    expect(result == true, "Proof should return valid result");
+    assert.equal(result, true, "Proof should return valid result");
   });
 
   it("should return false for incorrect proof", async function () {
-    const result = await this.contract.verifyTx(
-      incorrectProof.proof,
-      incorrectProof.inputs
+    // Simulate a cheated proof provided in docs https://zokrates.github.io/examples/rng_tutorial.html
+    cheat = [...correctProof.inputs];
+    cheat[cheat.length - 1] = cheat[cheat.length - 1].replace(
+      /[01]$/,
+      cheat[cheat.length - 1][65] == "1" ? "0" : "1"
     );
-    expect(result == false, "Proof should not return valid result");
+
+    const result = await this.contract.verifyTx(correctProof.proof, cheat);
+    assert.equal(result, false, "Proof should not return valid result");
   });
 });
