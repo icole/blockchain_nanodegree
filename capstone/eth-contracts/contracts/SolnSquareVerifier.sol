@@ -4,10 +4,6 @@ pragma solidity ^0.8.7;
 
 import "./ERC721Mintable.sol";
 
-// TODO define a contract call to the zokrates generated solidity contract <Verifier> or <renamedVerifier>
-
-// TODO define another contract named SolnSquareVerifier that inherits from your ERC721Mintable class
-
 // TODO define a solutions struct that can hold an index & an address
 
 // TODO define an array of the above struct
@@ -22,7 +18,44 @@ import "./ERC721Mintable.sol";
 //  - make sure the solution is unique (has not been used before)
 //  - make sure you handle metadata as well as tokenSuplly
 contract SolnSquareVerifier is ERC721Mintable {
-    constructor(string memory name, string memory symbol)
-        ERC721Mintable(name, symbol)
-    {}
+    ISquareVerifier private squareVerifier;
+
+    constructor(
+        address verifierAddress,
+        string memory name,
+        string memory symbol
+    ) ERC721Mintable(name, symbol) {
+        squareVerifier = ISquareVerifier(verifierAddress);
+    }
+
+    function verify(ISquareVerifier.Proof memory proof, uint256[2] memory input)
+        internal
+        view
+        returns (bool r)
+    {
+        return squareVerifier.verifyTx(proof, input);
+    }
+}
+
+interface ISquareVerifier {
+    struct G1Point {
+        uint256 X;
+        uint256 Y;
+    }
+
+    struct G2Point {
+        uint256[2] X;
+        uint256[2] Y;
+    }
+
+    struct Proof {
+        G1Point a;
+        G2Point b;
+        G1Point c;
+    }
+
+    function verifyTx(Proof memory proof, uint256[2] memory input)
+        external
+        view
+        returns (bool r);
 }
