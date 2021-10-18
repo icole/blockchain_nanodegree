@@ -1,6 +1,6 @@
 const fs = require("fs");
 const SquareVerifier = artifacts.require("SquareVerifier");
-const correctProof = JSON.parse(fs.readFileSync("./proof.json"));
+const correctProof = JSON.parse(fs.readFileSync("./proofs/proof-0.json"));
 
 contract("TestSquareVerifier", (accounts) => {
   beforeEach(async function () {
