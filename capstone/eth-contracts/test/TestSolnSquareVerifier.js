@@ -15,7 +15,7 @@ contract("TestSolnSquareVerifier", (accounts) => {
 
   it("should mint a new token for a new correct proof", async function () {
     const originalSupply = await this.contract.totalSupply();
-    await this.contract.mint(
+    await this.contract.verifiedMint(
       correctProof.proof,
       correctProof.inputs,
       accounts[1],
@@ -31,7 +31,7 @@ contract("TestSolnSquareVerifier", (accounts) => {
 
   it("should not allow an existing proof to be reused", async function () {
     // Use proof once for initial minting
-    await this.contract.mint(
+    await this.contract.verifiedMint(
       correctProof.proof,
       correctProof.inputs,
       accounts[1],
@@ -41,7 +41,7 @@ contract("TestSolnSquareVerifier", (accounts) => {
     const originalSupply = await this.contract.totalSupply();
     let reverted = false;
     try {
-      await this.contract.mint(
+      await this.contract.verifiedMint(
         correctProof.proof,
         correctProof.inputs,
         accounts[1],
@@ -71,7 +71,12 @@ contract("TestSolnSquareVerifier", (accounts) => {
     const originalSupply = await this.contract.totalSupply();
     let reverted = false;
     try {
-      await this.contract.mint(correctProof.proof, cheat, accounts[1], 4);
+      await this.contract.verifiedMint(
+        correctProof.proof,
+        cheat,
+        accounts[1],
+        4
+      );
     } catch (e) {
       reverted = true;
     }

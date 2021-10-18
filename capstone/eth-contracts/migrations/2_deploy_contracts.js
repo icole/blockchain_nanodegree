@@ -7,7 +7,7 @@ module.exports = async function (deployer) {
   await deployer.deploy(
     SolnSquareVerifier,
     SquareVerifier.address,
-    "Test",
-    "TEST"
+    "Dodo Real Estate",
+    "DODORE"
   );
 };

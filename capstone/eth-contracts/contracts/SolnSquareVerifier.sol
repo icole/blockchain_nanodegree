@@ -49,7 +49,7 @@ contract SolnSquareVerifier is ERC721Mintable {
             );
     }
 
-    function mint(
+    function verifiedMint(
         ISquareVerifier.Proof memory proof,
         uint256[2] memory inputs,
         address to,
