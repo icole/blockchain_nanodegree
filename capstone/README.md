@@ -13,11 +13,11 @@ All initial 10 tokens were minted with proofs in `eth-contracts/proofs` and via 
 
 ## Deployment Details
 
-Rinkeby Contract - [0xb93d1a11feeaa765ab672e2ae9b2c28cd7406cee](https://rinkeby.etherscan.io/address/0xb93d1a11feeaa765ab672e2ae9b2c28cd7406cee)
-Contract Owner - [0x27d8d15cbc94527cadf5ec14b69519ae23288b95](https://rinkeby.etherscan.io/address/0x27d8d15cbc94527cadf5ec14b69519ae23288b95)
-Minted Token Owner - [0x018C2daBef4904ECbd7118350A0c54DbeaE3549A](https://rinkeby.etherscan.io/address/0x018C2daBef4904ECbd7118350A0c54DbeaE3549A)
-Opensea Buy - [0xce5144391b4ab80668965f2cc4f2cc102380ef0a](https://rinkeby.etherscan.io/address/0xce5144391b4ab80668965f2cc4f2cc102380ef0a)
-Opensea Collection - https://testnets.opensea.io/collection/dodo-real-estate
+- Rinkeby Contract - [0xb93d1a11feeaa765ab672e2ae9b2c28cd7406cee](https://rinkeby.etherscan.io/address/0xb93d1a11feeaa765ab672e2ae9b2c28cd7406cee)
+- Contract Owner - [0x27d8d15cbc94527cadf5ec14b69519ae23288b95](https://rinkeby.etherscan.io/address/0x27d8d15cbc94527cadf5ec14b69519ae23288b95)
+- Minted Token Owner - [0x018C2daBef4904ECbd7118350A0c54DbeaE3549A](https://rinkeby.etherscan.io/address/0x018C2daBef4904ECbd7118350A0c54DbeaE3549A)
+- Opensea Buy - [0xce5144391b4ab80668965f2cc4f2cc102380ef0a](https://rinkeby.etherscan.io/address/0xce5144391b4ab80668965f2cc4f2cc102380ef0a)
+- Opensea Collection - https://testnets.opensea.io/collection/dodo-real-estate
 
 # Project Resources
 
